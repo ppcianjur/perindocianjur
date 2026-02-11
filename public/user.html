@@ -14,47 +14,19 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* --- FORMAT PRINT A4 LANDSCAPE (DETAIL) --- */
         @media print {
             @page { size: A4 landscape; margin: 5mm; }
-            body { 
-                background: white; 
-                color: black; 
-                font-family: Arial, sans-serif;
-                -webkit-print-color-adjust: exact;
-            }
-            
-            /* Sembunyikan UI Aplikasi */
-            header, nav, #sec-dashboard, #sec-scan, #sec-hasil, #sec-profil, .no-print, button, .filters { 
-                display: none !important; 
-            }
-            
-            /* Tampilkan Area Laporan */
-            #sec-laporan { 
-                display: block !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-            }
-            
-            #printArea { 
-                display: block !important; 
-                box-shadow: none !important; 
-                border: none !important; 
-                width: 100% !important;
-            }
-            
-            /* Tabel Rinci & Padat */
-            table { width: 100%; border-collapse: collapse; font-size: 10px; }
-            th, td { border: 1px solid #000; padding: 4px; text-align: left; vertical-align: middle; }
-            th { background-color: #e2e8f0 !important; font-weight: bold; text-align: center; }
-            
-            /* Header Cetak */
+            body { background: white; font-family: Arial, sans-serif; -webkit-print-color-adjust: exact; color: black; font-size: 10px; }
+            header, nav, #sec-dashboard, #sec-scan, #sec-hasil, #sec-profil, .no-print, button, .filters { display: none !important; }
+            #sec-laporan { display: block !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+            #printArea { display: block !important; width: 100% !important; border: none !important; box-shadow: none !important; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th, td { border: 1px solid #000; padding: 4px; text-align: left; vertical-align: middle; word-wrap: break-word; }
+            th { background-color: #e5e7eb !important; font-weight: bold; text-align: center; text-transform: uppercase; }
             .print-header { text-align: center; margin-bottom: 10px; border-bottom: 2px solid black; padding-bottom: 5px; }
-            .print-header h1 { font-size: 16px; font-weight: bold; margin: 0; text-transform: uppercase; }
-            .print-header p { font-size: 11px; margin: 2px 0 0 0; }
+            .print-header h1 { font-size: 16px; font-weight: bold; margin: 0; }
         }
-        
-        #printArea { display: none; } /* Sembunyikan di layar HP */
+        #printArea { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 pb-28 select-none">
@@ -70,12 +42,9 @@
     </header>
 
     <main class="max-w-md mx-auto px-4 -mt-6 relative z-20">
-        
         <section id="sec-dashboard" class="page-section space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
-                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-600"></i> Statistik Saya
-                </h3>
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-600"></i> Statistik Saya</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
                         <p class="text-3xl font-extrabold text-blue-600" id="dashTotal">0</p>
@@ -87,14 +56,11 @@
                     </div>
                 </div>
             </div>
-            
             <div class="bg-gradient-to-r from-orange-400 to-pink-500 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden">
                 <i data-lucide="scan-face" class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10"></i>
                 <h3 class="font-bold text-lg relative z-10">Mulai Scan Data?</h3>
                 <p class="text-xs text-white/80 mb-4 relative z-10 max-w-[70%]">Gunakan fitur Scan KTP untuk mempercepat input data pengurus.</p>
-                <button onclick="navTo('scan')" class="bg-white text-orange-500 px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform relative z-10">
-                    Buka Scanner
-                </button>
+                <button onclick="navTo('scan')" class="bg-white text-orange-500 px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform relative z-10">Buka Scanner</button>
             </div>
         </section>
 
@@ -112,7 +78,6 @@
                 <input type="file" id="inputKtpKamera" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'ktp')">
                 <input type="file" id="inputKtpGaleri" accept="image/*" class="hidden" onchange="previewImage(this, 'ktp')">
             </div>
-
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                 <h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-green-500"></i> Foto Selfie (Opsional)</h3>
                 <div id="previewOrangContainer" class="hidden relative mb-3 group">
@@ -126,28 +91,16 @@
                 <input type="file" id="inputOrangKamera" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'orang')">
                 <input type="file" id="inputOrangGaleri" accept="image/*" class="hidden" onchange="previewImage(this, 'orang')">
             </div>
-
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. WhatsApp</label>
-                        <input type="tel" id="noHp" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan</label>
+                    <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. WhatsApp</label><input type="tel" id="noHp" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan</label>
                         <select id="jabatan" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">- Pilih -</option>
-                            <option value="Ketua">Ketua</option>
-                            <option value="Sekretaris">Sekretaris</option>
-                            <option value="Bendahara">Bendahara</option>
-                            <option value="Anggota">Anggota</option>
-                            <option value="Koordinator">Kordes</option>
+                            <option value="">- Pilih -</option><option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option><option value="Koordinator">Kordes</option>
                         </select>
                     </div>
                 </div>
-                <button id="btnProses" onclick="prosesScan()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="scan-line"></i> Proses Data
-                </button>
+                <button id="btnProses" onclick="prosesScan()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2"><i data-lucide="scan-line"></i> Proses Data</button>
             </div>
         </section>
 
@@ -159,9 +112,7 @@
                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
                 </div>
             </div>
-            
             <div id="listContainer" class="space-y-3 min-h-[300px]"></div>
-            
             <div id="pagination" class="flex justify-center items-center gap-2 pt-4 hidden">
                 <button onclick="prevPage()" class="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50" id="btnPrev"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                 <span id="pageInfo" class="text-xs font-bold text-slate-500">Hal 1</span>
@@ -172,44 +123,32 @@
         <section id="sec-laporan" class="page-section hidden animate-in fade-in duration-300">
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 no-print">
                 <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                        <i data-lucide="file-spreadsheet" class="w-6 h-6 text-blue-600"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-800">Unduh Laporan</h3>
-                        <p class="text-xs text-slate-500">Laporan data lengkap dengan Alamat, RT, RW (A4)</p>
-                    </div>
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center"><i data-lucide="file-spreadsheet" class="w-6 h-6 text-blue-600"></i></div>
+                    <div><h3 class="font-bold text-lg text-slate-800">Unduh Laporan</h3><p class="text-xs text-slate-500">Laporan lengkap format A4 Landscape</p></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="downloadExcel()" class="flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all shadow-lg shadow-green-100">
-                        <i data-lucide="file-xls" class="w-4 h-4"></i> Excel Lengkap
-                    </button>
-                    <button onclick="window.print()" class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all shadow-lg shadow-slate-200">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Print A4
-                    </button>
+                    <button onclick="downloadExcel()" class="flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all shadow-lg shadow-green-100"><i data-lucide="file-xls" class="w-4 h-4"></i> Excel Lengkap</button>
+                    <button onclick="window.print()" class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all shadow-lg shadow-slate-200"><i data-lucide="printer" class="w-4 h-4"></i> Print A4</button>
                 </div>
             </div>
-
             <div id="printArea">
-                <div class="print-header">
-                    <h1>LAPORAN DATA PENGURUS SAYA</h1>
-                    <p id="printSubtitle">Dicetak oleh: ...</p>
-                </div>
-                
+                <div class="print-header"><h1>LAPORAN DATA PENGURUS</h1><p id="printSubtitle">Dicetak oleh: ...</p></div>
                 <table>
                     <thead>
                         <tr>
                             <th style="width: 3%;">No</th>
-                            <th style="width: 15%;">Nama</th>
-                            <th style="width: 12%;">NIK</th>
-                            <th style="width: 10%;">Jabatan</th>
-                            <th style="width: 12%;">Kecamatan</th>
-                            <th style="width: 12%;">Desa</th>
-                            <th style="width: 18%;">Alamat</th> <th style="width: 4%;">RT</th>     <th style="width: 4%;">RW</th>     <th style="width: 10%;">No HP</th>
+                            <th style="width: 18%;">Nama</th>
+                            <th style="width: 10%;">NIK</th>
+                            <th style="width: 7%;">JK</th> <th style="width: 8%;">Jabatan</th>
+                            <th style="width: 10%;">Kecamatan</th>
+                            <th style="width: 10%;">Desa</th>
+                            <th style="width: 15%;">Alamat</th>
+                            <th style="width: 4%;">RT</th>
+                            <th style="width: 4%;">RW</th>
+                            <th style="width: 9%;">No HP</th>
                         </tr>
                     </thead>
-                    <tbody id="tableLaporanBody">
-                        </tbody>
+                    <tbody id="tableLaporanBody"></tbody>
                 </table>
             </div>
         </section>
@@ -217,61 +156,29 @@
         <section id="sec-profil" class="page-section hidden animate-in fade-in duration-300">
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
-                        <i data-lucide="user" class="w-10 h-10"></i>
-                    </div>
+                    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold"><i data-lucide="user" class="w-10 h-10"></i></div>
                     <h3 class="font-bold text-xl text-slate-800" id="profileName">...</h3>
                     <p class="text-sm text-slate-500 uppercase tracking-wide" id="profileRole">Petugas</p>
                 </div>
-
                 <div class="border-t pt-6">
                     <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i> Ganti Password</h4>
                     <div class="space-y-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password Lama</label>
-                            <input type="password" id="oldPass" class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password Baru</label>
-                            <input type="password" id="newPass" class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button onclick="changePassword()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all">
-                            Simpan Password Baru
-                        </button>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password Lama</label><input type="password" id="oldPass" class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password Baru</label><input type="password" id="newPass" class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <button onclick="changePassword()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all">Simpan Password Baru</button>
                     </div>
                 </div>
-
-                <button onclick="logout()" class="w-full py-3 border-2 border-red-100 text-red-500 rounded-xl font-bold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar Aplikasi
-                </button>
+                <button onclick="logout()" class="w-full py-3 border-2 border-red-100 text-red-500 rounded-xl font-bold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Keluar Aplikasi</button>
             </div>
         </section>
-
     </main>
 
     <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 pb-safe pt-2 px-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40 flex justify-between items-end">
-        <button onclick="navTo('dashboard')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="dashboard">
-            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-            <span class="text-[9px] font-medium">Home</span>
-        </button>
-        <button onclick="navTo('laporan')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="laporan">
-            <i data-lucide="file-text" class="w-5 h-5"></i>
-            <span class="text-[9px] font-medium">Laporan</span>
-        </button>
-        <button onclick="navTo('scan')" class="bottom-nav-item flex-1 flex flex-col items-center justify-end z-50 -mt-8" data-target="scan">
-            <div class="bg-blue-600 w-14 h-14 rounded-full shadow-lg shadow-blue-200 border-4 border-slate-50 text-white flex items-center justify-center transform active:scale-90 transition-all">
-                <i data-lucide="scan-line" class="w-7 h-7"></i>
-            </div>
-            <span class="text-[9px] font-bold text-blue-600 mt-1">SCAN</span>
-        </button>
-        <button onclick="navTo('hasil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="hasil">
-            <i data-lucide="database" class="w-5 h-5"></i>
-            <span class="text-[9px] font-medium">Data</span>
-        </button>
-        <button onclick="navTo('profil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="profil">
-            <i data-lucide="user-circle" class="w-5 h-5"></i>
-            <span class="text-[9px] font-medium">Profil</span>
-        </button>
+        <button onclick="navTo('dashboard')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="text-[9px] font-medium">Home</span></button>
+        <button onclick="navTo('laporan')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="laporan"><i data-lucide="file-text" class="w-5 h-5"></i><span class="text-[9px] font-medium">Laporan</span></button>
+        <button onclick="navTo('scan')" class="bottom-nav-item flex-1 flex flex-col items-center justify-end z-50 -mt-8" data-target="scan"><div class="bg-blue-600 w-14 h-14 rounded-full shadow-lg shadow-blue-200 border-4 border-slate-50 text-white flex items-center justify-center transform active:scale-90 transition-all"><i data-lucide="scan-line" class="w-7 h-7"></i></div><span class="text-[9px] font-bold text-blue-600 mt-1">SCAN</span></button>
+        <button onclick="navTo('hasil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="hasil"><i data-lucide="database" class="w-5 h-5"></i><span class="text-[9px] font-medium">Data</span></button>
+        <button onclick="navTo('profil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="profil"><i data-lucide="user-circle" class="w-5 h-5"></i><span class="text-[9px] font-medium">Profil</span></button>
     </nav>
 
     <div id="modalConfirm" class="fixed inset-0 z-50 hidden bg-slate-900/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 no-print">
@@ -283,18 +190,10 @@
             <div class="p-6 overflow-y-auto flex-1 bg-slate-50 space-y-4">
                 <input type="hidden" id="editFotoUrl"><input type="hidden" id="editFotoOrangUrl">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold uppercase text-slate-400">Foto KTP</p>
-                        <img id="displayKtp" class="w-full h-32 object-cover rounded-xl border border-slate-200 bg-white">
-                    </div>
-                    <div class="space-y-2 relative">
-                        <p class="text-[10px] font-bold uppercase text-slate-400">Foto Selfie</p>
-                        <div class="relative group">
-                            <img id="displayOrang" class="w-full h-32 object-cover rounded-xl border border-slate-200 bg-white">
-                            <div id="overlayEditFoto" class="absolute inset-0 bg-black/50 rounded-xl hidden flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                <button onclick="document.getElementById('editFileOrang').click()" class="bg-white text-xs px-3 py-1 rounded-full font-bold">Ubah</button>
-                                <button onclick="hapusFotoOrang()" class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-bold">Hapus</button>
-                            </div>
+                    <div class="space-y-2"><p class="text-[10px] font-bold uppercase text-slate-400">Foto KTP</p><img id="displayKtp" class="w-full h-32 object-cover rounded-xl border border-slate-200 bg-white"></div>
+                    <div class="space-y-2 relative"><p class="text-[10px] font-bold uppercase text-slate-400">Foto Selfie</p>
+                        <div class="relative group"><img id="displayOrang" class="w-full h-32 object-cover rounded-xl border border-slate-200 bg-white">
+                            <div id="overlayEditFoto" class="absolute inset-0 bg-black/50 rounded-xl hidden flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all"><button onclick="document.getElementById('editFileOrang').click()" class="bg-white text-xs px-3 py-1 rounded-full font-bold">Ubah</button><button onclick="hapusFotoOrang()" class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-bold">Hapus</button></div>
                         </div>
                         <input type="file" id="editFileOrang" class="hidden" accept="image/*" onchange="uploadNewFotoOrang(this)">
                     </div>
@@ -302,20 +201,22 @@
                 <div class="space-y-3">
                     <div><label class="label-xs">NIK</label><input id="editNik" type="text" inputmode="numeric" class="input-field font-mono"></div>
                     <div><label class="label-xs">Nama Lengkap</label><input id="editNama" type="text" class="input-field font-bold uppercase"></div>
-                    <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200 space-y-2">
-                         <label class="label-xs text-yellow-700">Lokasi (Database)</label>
-                         <select id="editKec" onchange="loadDesaOptions(this.value)" class="input-field bg-white mb-2"></select>
-                         <select id="editDesa" class="input-field bg-white"></select>
-                    </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div><label class="label-xs">Tempat Lahir</label><input id="editTempatLahir" type="text" class="input-field"></div>
                         <div><label class="label-xs">Tgl Lahir</label><input id="editTglLahir" type="text" class="input-field"></div>
                     </div>
-                    <div><label class="label-xs">Alamat</label><textarea id="editAlamat" rows="2" class="input-field"></textarea></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label class="label-xs">No. HP</label><input id="editNoHp" type="tel" class="input-field"></div>
-                        <div><label class="label-xs">Jabatan</label><select id="editJabatan" class="input-field"><option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option><option value="Koordinator">Kordes</option></select></div>
+                    <div>
+                        <label class="label-xs">Jenis Kelamin</label>
+                        <select id="editGender" class="input-field">
+                            <option value="">- Pilih -</option>
+                            <option value="LAKI-LAKI">LAKI-LAKI</option>
+                            <option value="PEREMPUAN">PEREMPUAN</option>
+                        </select>
                     </div>
+                    <div><label class="label-xs">Alamat</label><textarea id="editAlamat" rows="2" class="input-field"></textarea></div>
+                    <div class="grid grid-cols-2 gap-3"><div><label class="label-xs">RT</label><input id="editRt" type="text" class="input-field text-center"></div><div><label class="label-xs">RW</label><input id="editRw" type="text" class="input-field text-center"></div></div>
+                    <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200 space-y-2"><label class="label-xs text-yellow-700">Lokasi (Database)</label><select id="editKec" onchange="loadDesaOptions(this.value)" class="input-field bg-white mb-2"></select><select id="editDesa" class="input-field bg-white"></select></div>
+                    <div class="grid grid-cols-2 gap-3"><div><label class="label-xs">No. HP</label><input id="editNoHp" type="tel" class="input-field"></div><div><label class="label-xs">Jabatan</label><select id="editJabatan" class="input-field"><option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option><option value="Koordinator">Kordes</option></select></div></div>
                 </div>
             </div>
             <div class="p-4 border-t bg-white">
@@ -337,20 +238,12 @@
         let currentPage = 1, currentDetailId = null;
         const rowsPerPage = 10;
 
-        // INIT
-        fetchMasterData();
-        loadMyData();
-        navTo('dashboard'); 
+        fetchMasterData(); loadMyData(); navTo('dashboard'); 
 
         function navTo(targetId) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${targetId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.bottom-nav-item').forEach(el => {
-                el.classList.remove('active', 'text-blue-600');
-                if(el.dataset.target === targetId) el.classList.add('active', 'text-blue-600');
-            });
-
+            document.querySelectorAll('.bottom-nav-item').forEach(el => { el.classList.remove('active', 'text-blue-600'); if(el.dataset.target === targetId) el.classList.add('active', 'text-blue-600'); });
             if(targetId === 'dashboard') loadStats();
             if(targetId === 'hasil' || targetId === 'laporan') loadMyData();
         }
@@ -365,11 +258,9 @@
             } catch (e) {}
         }
 
-        async function loadStats() {
-            document.getElementById('dashTotal').innerText = allData.length || '0';
-        }
+        async function loadStats() { document.getElementById('dashTotal').innerText = allData.length || '0'; }
 
-        // --- SCAN LOGIC (SAMA SEPERTI SEBELUMNYA) ---
+        // SCAN
         function previewImage(input, type) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
@@ -391,17 +282,8 @@
             }
         }
         function resetFoto(type) {
-            if (type === 'ktp') {
-                fileKtp = null; base64Ktp = "";
-                document.getElementById('previewKtpContainer').classList.add('hidden');
-                document.getElementById('btnKtpPlaceholder').classList.remove('hidden');
-                document.getElementById('inputKtpKamera').value = "";
-            } else {
-                fileOrang = null;
-                document.getElementById('previewOrangContainer').classList.add('hidden');
-                document.getElementById('btnOrangPlaceholder').classList.remove('hidden');
-                document.getElementById('inputOrangKamera').value = "";
-            }
+            if (type === 'ktp') { fileKtp = null; base64Ktp = ""; document.getElementById('previewKtpContainer').classList.add('hidden'); document.getElementById('btnKtpPlaceholder').classList.remove('hidden'); document.getElementById('inputKtpKamera').value = ""; } 
+            else { fileOrang = null; document.getElementById('previewOrangContainer').classList.add('hidden'); document.getElementById('btnOrangPlaceholder').classList.remove('hidden'); document.getElementById('inputOrangKamera').value = ""; }
         }
 
         async function prosesScan() {
@@ -410,35 +292,28 @@
             const jab = document.getElementById('jabatan').value;
             if (!hp || !jab) return Swal.fire("Wajib", "No HP dan Jabatan harus diisi!", "warning");
 
-            const btn = document.getElementById('btnProses');
-            btn.disabled = true; btn.innerHTML = `🌀 Memproses...`;
+            const btn = document.getElementById('btnProses'); btn.disabled = true; btn.innerHTML = `🌀 Memproses...`;
 
             try {
                 let fotoOrangUrl = "";
                 if (fileOrang) {
-                    const fdOrang = new FormData();
-                    fdOrang.append('file', fileOrang);
+                    const fdOrang = new FormData(); fdOrang.append('file', fileOrang);
                     const resOrang = await fetch('/api/upload-simple', { method: 'POST', body: fdOrang });
                     const jsonOrang = await resOrang.json();
                     if(jsonOrang.success) fotoOrangUrl = jsonOrang.url;
                 }
 
-                const fdKtp = new FormData();
-                fdKtp.append('foto', fileKtp);
-                fdKtp.append('base64', base64Ktp);
-                fdKtp.append('creator', user.username);
-                
+                const fdKtp = new FormData(); fdKtp.append('foto', fileKtp); fdKtp.append('base64', base64Ktp); fdKtp.append('creator', user.username);
                 const resKtp = await fetch('/api/upload-ktp', { method: 'POST', body: fdKtp });
                 const jsonKtp = await resKtp.json();
                 if (!jsonKtp.success) throw new Error(jsonKtp.error);
 
                 openDetailModal({...jsonKtp.data, foto_url: jsonKtp.foto_url, foto_orang_url: fotoOrangUrl, no_hp: hp, jabatan: jab}, false);
-
             } catch (e) { Swal.fire("Error", e.message, "error"); } 
             finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`; lucide.createIcons(); }
         }
 
-        // --- MODAL LOGIC (SAMA) ---
+        // MODAL
         async function openDetailModal(data, isReadOnlyMode) {
             currentDetailId = data.id || null;
             document.getElementById('displayKtp').src = data.foto_url;
@@ -447,14 +322,17 @@
             document.getElementById('editFotoOrangUrl').value = data.foto_orang_url || "";
 
             const overlay = document.getElementById('overlayEditFoto');
-            if (isReadOnlyMode) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); } 
-            else { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
+            if (isReadOnlyMode) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); } else { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
 
             document.getElementById('editNik').value = data.nik || "";
             document.getElementById('editNama').value = data.nama || "";
             document.getElementById('editTempatLahir').value = data.tempat_lahir || "";
             document.getElementById('editTglLahir').value = data.tanggal_lahir || "";
+            // AUTO FILL JENIS KELAMIN
+            document.getElementById('editGender').value = data.jenis_kelamin ? data.jenis_kelamin.toUpperCase() : "";
             document.getElementById('editAlamat').value = data.alamat || "";
+            document.getElementById('editRt').value = data.rt || "";
+            document.getElementById('editRw').value = data.rw || "";
             document.getElementById('editNoHp').value = data.no_hp || "";
             document.getElementById('editJabatan').value = data.jabatan || "Anggota";
 
@@ -483,11 +361,9 @@
         }
 
         async function loadDesaOptions(kodeKec, autoSelectName = null) {
-            const selDesa = document.getElementById('editDesa');
-            selDesa.innerHTML = '<option>Loading...</option>';
+            const selDesa = document.getElementById('editDesa'); selDesa.innerHTML = '<option>Loading...</option>';
             try {
-                const res = await fetch(`/api/locations?type=desa&parent=${kodeKec}`);
-                const desas = await res.json();
+                const res = await fetch(`/api/locations?type=desa&parent=${kodeKec}`); const desas = await res.json();
                 selDesa.innerHTML = '<option value="">- Pilih Desa -</option>';
                 desas.forEach(d => {
                     const sel = (autoSelectName && d.nama_desa.toLowerCase().includes(autoSelectName.toLowerCase().replace(/(desa|kelurahan)/g,"").trim())) ? 'selected' : '';
@@ -500,6 +376,8 @@
             const payload = {
                 nik: document.getElementById('editNik').value,
                 nama: document.getElementById('editNama').value,
+                // SIMPAN JENIS KELAMIN
+                jenis_kelamin: document.getElementById('editGender').value,
                 kode_desa_lengkap: document.getElementById('editDesa').value,
                 nama_desa: document.getElementById('editDesa').options[document.getElementById('editDesa').selectedIndex]?.text,
                 foto_url: document.getElementById('editFotoUrl').value,
@@ -509,13 +387,14 @@
                 tempat_lahir: document.getElementById('editTempatLahir').value,
                 tanggal_lahir: document.getElementById('editTglLahir').value,
                 alamat: document.getElementById('editAlamat').value,
-                rt: "00", rw: "00", creator: user.username
+                rt: document.getElementById('editRt').value, 
+                rw: document.getElementById('editRw').value,
+                creator: user.username
             };
             try {
                 const res = await fetch('/api/simpan-data', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
                 const result = await res.json();
-                if(result.success) { closeModal(); Swal.fire("Berhasil", "Data disimpan", "success"); navTo('hasil'); } 
-                else throw new Error(result.error);
+                if(result.success) { closeModal(); Swal.fire("Berhasil", "Data disimpan", "success"); navTo('hasil'); } else throw new Error(result.error);
             } catch(e) { Swal.fire("Gagal", e.message, "error"); }
         }
 
@@ -541,112 +420,55 @@
 
         function closeModal() { document.getElementById('modalConfirm').classList.add('hidden'); }
 
-        // --- 3. LIST, PRINT & EXPORT LOGIC (DIPERBAIKI) ---
         async function loadMyData() {
             if(allData.length === 0) document.getElementById('listContainer').innerHTML = '<div class="text-center py-10"><span class="animate-spin">🌀</span></div>';
             try {
                 const res = await fetch(`/api/my-data?user=${user.username}`);
                 allData = await res.json();
                 document.getElementById('dashTotal').innerText = allData.length;
-                renderList();
-                renderTableLaporan();
-            } catch (e) { console.error("Gagal load data"); }
+                renderList(); renderTableLaporan();
+            } catch (e) {}
         }
 
         function renderList() {
             const container = document.getElementById('listContainer');
             const search = document.getElementById('searchBox').value.toLowerCase();
             const filtered = allData.filter(i => i.nama.toLowerCase().includes(search));
-            
             container.innerHTML = "";
             const start = (currentPage - 1) * rowsPerPage;
             const paginated = filtered.slice(start, start + rowsPerPage);
-            
             if (paginated.length === 0) { container.innerHTML = '<p class="text-center text-slate-400 py-10">Data tidak ditemukan</p>'; return; }
-
             paginated.forEach(item => {
-                // Pastikan nama kecamatan muncul, jika tidak ada fallback ke 'Kecamatan'
                 const kec = item.nama_kecamatan || 'Kecamatan'; 
-                
-                container.innerHTML += `
-                    <div onclick='openDetailFromList(${JSON.stringify(item)})' class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
-                        <img src="${item.foto_url}" class="w-12 h-12 rounded-lg object-cover bg-slate-100">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-slate-800 text-sm truncate">${item.nama}</p>
-                            <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
-                                <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">${item.jabatan}</span>
-                                <span class="truncate">${item.nama_desa || 'Desa'} - ${kec}</span>
-                            </div>
-                        </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
-                    </div>`;
+                container.innerHTML += `<div onclick='openDetailFromList(${JSON.stringify(item)})' class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-95 transition-transform cursor-pointer"><img src="${item.foto_url}" class="w-12 h-12 rounded-lg object-cover bg-slate-100"><div class="flex-1 min-w-0"><p class="font-bold text-slate-800 text-sm truncate">${item.nama}</p><div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5"><span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">${item.jabatan}</span><span class="truncate">${item.nama_desa || 'Desa'} - ${kec}</span></div></div><i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i></div>`;
             });
             document.getElementById('pageInfo').innerText = `Hal ${currentPage}`;
             if(allData.length > rowsPerPage) document.getElementById('pagination').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        // FUNGSI RENDER TABEL LAPORAN (DETAIL)
         function renderTableLaporan() {
-            const body = document.getElementById('tableLaporanBody');
-            body.innerHTML = '';
-            
+            const body = document.getElementById('tableLaporanBody'); body.innerHTML = '';
             allData.forEach((item, index) => {
-                body.innerHTML += `
-                    <tr>
-                        <td>${index+1}</td>
-                        <td>${item.nama}</td>
-                        <td style="font-family: monospace;">${item.nik}</td>
-                        <td>${item.jabatan}</td>
-                        <td>${item.nama_kecamatan || '-'}</td>
-                        <td>${item.nama_desa || '-'}</td>
-                        <td>${item.alamat || '-'}</td>  <td>${item.rt || '-'}</td>      <td>${item.rw || '-'}</td>      <td>${item.no_hp}</td>
-                    </tr>`;
+                body.innerHTML += `<tr><td>${index+1}</td><td>${item.nama}</td><td style="font-family: monospace;">${item.nik}</td><td>${item.jenis_kelamin || '-'}</td><td>${item.jabatan}</td><td>${item.nama_kecamatan || '-'}</td><td>${item.nama_desa || '-'}</td><td>${item.alamat || '-'}</td><td>${item.rt || '-'}</td><td>${item.rw || '-'}</td><td>${item.no_hp}</td></tr>`;
             });
         }
 
-        // FUNGSI EXPORT EXCEL (DETAIL LENGKAP)
         function downloadExcel() {
             if (allData.length === 0) return Swal.fire("Kosong", "Tidak ada data untuk diexport", "info");
-            
             const dataToExport = allData.map((item, idx) => ({
-                "No": idx + 1,
-                "Nama Lengkap": item.nama,
-                "NIK": item.nik,
-                "Jabatan": item.jabatan,
-                "Kecamatan": item.nama_kecamatan || "-",
-                "Desa": item.nama_desa,
-                "Alamat Lengkap": item.alamat, // Tambahan
-                "RT": item.rt || "-",          // Tambahan
-                "RW": item.rw || "-",          // Tambahan
-                "No HP": item.no_hp,
-                "Tempat Lahir": item.tempat_lahir,
-                "Tanggal Lahir": item.tanggal_lahir,
-                "Foto KTP": item.foto_url,
-                "Foto Selfie": item.foto_orang_url,
-                "Waktu Input": item.created_at
+                "No": idx + 1, "Nama Lengkap": item.nama, "NIK": item.nik, "Jenis Kelamin": item.jenis_kelamin || "-", "Jabatan": item.jabatan, "Kecamatan": item.nama_kecamatan || "-", "Desa": item.nama_desa, "Alamat Lengkap": item.alamat, "RT": item.rt || "-", "RW": item.rw || "-", "No HP": item.no_hp, "Tempat Lahir": item.tempat_lahir, "Tanggal Lahir": item.tanggal_lahir, "Waktu Input": item.created_at
             }));
-
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Data Pengurus");
-            XLSX.writeFile(wb, `Laporan_Pengurus_${user.username}.xlsx`);
+            const ws = XLSX.utils.json_to_sheet(dataToExport); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data Pengurus"); XLSX.writeFile(wb, `Laporan_Pengurus_${user.username}.xlsx`);
         }
 
         async function changePassword() {
-            const oldP = document.getElementById('oldPass').value;
-            const newP = document.getElementById('newPass').value;
+            const oldP = document.getElementById('oldPass').value; const newP = document.getElementById('newPass').value;
             if(!oldP || !newP) return Swal.fire("Error", "Isi semua form password!", "warning");
-            
             try {
-                const res = await fetch('/api/user/change-password', {
-                    method: 'POST', headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ username: user.username, oldPassword: oldP, newPassword: newP })
-                });
+                const res = await fetch('/api/user/change-password', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username: user.username, oldPassword: oldP, newPassword: newP }) });
                 const json = await res.json();
-                if(json.success) {
-                    Swal.fire("Sukses", "Password berhasil diganti. Silakan login ulang.", "success").then(logout);
-                } else throw new Error(json.error);
+                if(json.success) { Swal.fire("Sukses", "Password berhasil diganti. Silakan login ulang.", "success").then(logout); } else throw new Error(json.error);
             } catch(e) { Swal.fire("Gagal", e.message, "error"); }
         }
 
