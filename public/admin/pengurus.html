@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pengurus - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-slate-50 lg:ml-64">
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
+        <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="/admin/pengurus.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="users"></i> Data Pengurus</a>
+            <a href="/admin/users.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="user-cog"></i> Manajemen User</a>
+            <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="settings"></i> Settings</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl mt-10"><i data-lucide="log-out"></i> Logout</button>
+        </nav>
+    </aside>
+
+    <main class="p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Data Pengurus</h1>
+            <div class="flex gap-2">
+                <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 shadow-md">
+                    <i data-lucide="download"></i> Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="searchBox" placeholder="Cari Nama / NIK..." class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 md:col-span-1">
+            <select id="selKec" onchange="loadDesa(this.value)" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"><option value="">Semua Kecamatan</option></select>
+            <select id="selDesa" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"><option value="">Semua Desa</option></select>
+            <button onclick="filterData()" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Filter Data</button>
+        </div>
+
+        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <table class="w-full text-left" id="tableData">
+                <thead class="bg-slate-50 border-b">
+                    <tr class="text-xs font-bold text-slate-500 uppercase">
+                        <th class="p-4">Nama</th>
+                        <th class="p-4">Jabatan</th>
+                        <th class="p-4">Lokasi</th>
+                        <th class="p-4">Creator</th>
+                        <th class="p-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody" class="divide-y divide-slate-100 text-sm"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="modalEdit" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg">Edit Data Pengurus</h3>
+                <button onclick="closeEdit()" class="p-2 hover:bg-slate-100 rounded-full"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <input type="hidden" id="editId">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase">NIK</label><input type="text" id="editNik" class="w-full p-2 border rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase">Nama</label><input type="text" id="editNama" class="w-full p-2 border rounded-lg font-bold"></div>
+                    
+                    <div class="col-span-2 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <label class="block text-xs font-bold text-yellow-700 uppercase mb-2">Lokasi Administratif</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select id="editKecModal" onchange="loadDesaModal(this.value)" class="w-full p-2 border rounded-lg bg-white"></select>
+                            <select id="editDesaModal" class="w-full p-2 border rounded-lg bg-white"></select>
+                        </div>
+                    </div>
+
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase">Tempat Lahir</label><input type="text" id="editTempat" class="w-full p-2 border rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase">Tgl Lahir</label><input type="text" id="editTgl" class="w-full p-2 border rounded-lg"></div>
+                    
+                    <div class="col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase">Alamat</label><textarea id="editAlamat" rows="2" class="w-full p-2 border rounded-lg"></textarea></div>
+                    
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase">No HP</label><input type="text" id="editHp" class="w-full p-2 border rounded-lg"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase">Jabatan</label>
+                        <select id="editJabatan" class="w-full p-2 border rounded-lg">
+                            <option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option>
+                            <option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option>
+                            <option value="Koordinator">Koordinator Desa</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-slate-50 flex justify-end gap-2">
+                <button onclick="closeEdit()" class="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg">Batal</button>
+                <button onclick="saveChanges()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let allData = [];
+        let listKecamatan = [];
+
+        // LOAD DATA AWAL
+        async function init() {
+            // Load Kecamatan untuk Filter & Modal
+            const resKec = await fetch('/api/locations?type=kecamatan');
+            listKecamatan = await resKec.json();
+            
+            const selKec = document.getElementById('selKec');
+            const modalKec = document.getElementById('editKecModal');
+            
+            listKecamatan.forEach(k => {
+                const opt = `<option value="${k.kode_kec}">${k.nama_kecamatan}</option>`;
+                selKec.innerHTML += opt;
+                modalKec.innerHTML += opt;
+            });
+
+            filterData(); // Load table
+        }
+
+        // FILTER TABLE
+        async function filterData() {
+            const kec = document.getElementById('selKec').value;
+            const desa = document.getElementById('selDesa').value;
+            const search = document.getElementById('searchBox').value.toLowerCase();
+            
+            // Fetch all data if needed or with params
+            const res = await fetch(`/api/all-data?kec=${kec}&desa=${desa}`);
+            allData = await res.json();
+            
+            // Client side search filter
+            const filtered = allData.filter(item => 
+                item.nama.toLowerCase().includes(search) || 
+                item.nik.includes(search)
+            );
+
+            const body = document.getElementById('listBody');
+            body.innerHTML = '';
+            
+            if(filtered.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">Data tidak ditemukan</td></tr>';
+                return;
+            }
+
+            filtered.forEach(i => {
+                body.innerHTML += `
+                <tr class="hover:bg-slate-50 border-b last:border-0">
+                    <td class="p-4 font-bold text-slate-700">${i.nama}<br><span class="text-xs font-normal text-slate-400 font-mono">${i.nik}</span></td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded font-bold">${i.jabatan}</span></td>
+                    <td class="p-4 text-xs text-slate-600">${i.nama_desa}, ${i.nama_kecamatan}</td>
+                    <td class="p-4 text-xs text-slate-400">${i.creator}</td>
+                    <td class="p-4 text-center">
+                        <button onclick='openEditModal(${JSON.stringify(i)})' class="bg-yellow-100 text-yellow-600 p-2 rounded-lg hover:bg-yellow-200 transition-colors flex items-center gap-1 mx-auto text-xs font-bold">
+                            <i data-lucide="edit" class="w-3 h-3"></i> Edit
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            lucide.createIcons();
+        }
+
+        // MODAL LOGIC
+        async function openEditModal(data) {
+            document.getElementById('editId').value = data.id;
+            document.getElementById('editNik').value = data.nik;
+            document.getElementById('editNama').value = data.nama;
+            document.getElementById('editTempat').value = data.tempat_lahir || '';
+            document.getElementById('editTgl').value = data.tanggal_lahir || '';
+            document.getElementById('editAlamat').value = data.alamat || '';
+            document.getElementById('editHp').value = data.no_hp || '';
+            document.getElementById('editJabatan').value = data.jabatan;
+
+            // Handle Lokasi Dropdown
+            // Cari kode kecamatan dari data.kode_desa_lengkap (substring) atau join logic
+            // Asumsi data object punya 'kode_kec' (dari join query api/all-data)
+            // Jika tidak ada di object, kita cari manual dari listKecamatan match nama
+            let kodeKec = "";
+            const matchKec = listKecamatan.find(k => k.nama_kecamatan === data.nama_kecamatan);
+            if(matchKec) kodeKec = matchKec.kode_kec;
+
+            document.getElementById('editKecModal').value = kodeKec;
+            
+            // Load Desa untuk modal
+            await loadDesaModal(kodeKec, data.kode_desa_lengkap);
+
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+
+        async function loadDesaModal(kodeKec, selectedDesaCode = null) {
+            const sel = document.getElementById('editDesaModal');
+            sel.innerHTML = '<option>Loading...</option>';
+            if(!kodeKec) { sel.innerHTML = ''; return; }
+
+            const res = await fetch(`/api/locations?type=desa&parent=${kodeKec}`);
+            const desas = await res.json();
+            sel.innerHTML = '';
+            
+            desas.forEach(d => {
+                const isSel = (d.kode_desa_lengkap === selectedDesaCode) ? 'selected' : '';
+                sel.innerHTML += `<option value="${d.kode_desa_lengkap}" ${isSel}>${d.nama_desa}</option>`;
+            });
+        }
+
+        async function saveChanges() {
+            const payload = {
+                id: document.getElementById('editId').value,
+                nik: document.getElementById('editNik').value,
+                nama: document.getElementById('editNama').value,
+                no_hp: document.getElementById('editHp').value,
+                jabatan: document.getElementById('editJabatan').value,
+                alamat: document.getElementById('editAlamat').value,
+                tempat_lahir: document.getElementById('editTempat').value,
+                tanggal_lahir: document.getElementById('editTgl').value,
+                kode_desa_lengkap: document.getElementById('editDesaModal').value
+            };
+
+            const res = await fetch('/api/admin/update-pengurus', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if(res.ok) {
+                closeEdit();
+                Swal.fire("Berhasil", "Data telah diperbarui", "success");
+                filterData();
+            } else {
+                Swal.fire("Gagal", "Terjadi kesalahan sistem", "error");
+            }
+        }
+
+        function closeEdit() { document.getElementById('modalEdit').classList.add('hidden'); }
+        
+        // UTILS
+        async function loadDesa(k) {
+            const res = await fetch(`/api/locations?type=desa&parent=${k}`);
+            const data = await res.json();
+            const s = document.getElementById('selDesa');
+            s.innerHTML = '<option value="">Semua Desa</option>';
+            data.forEach(d => s.innerHTML += `<option value="${d.kode_desa_lengkap}">${d.nama_desa}</option>`);
+        }
+        function exportExcel() {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tableData")), "Data_Pengurus.xlsx");
+        }
+        function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+        
+        init();
+    </script>
+</body>
+</html>
