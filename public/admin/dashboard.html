@@ -21,29 +21,37 @@
     <main class="p-8">
         <header class="mb-8">
             <h1 class="text-3xl font-bold text-slate-800">Ringkasan Statistik</h1>
-            <p class="text-slate-500">Data Pengurus Perindo Kabupaten Cianjur</p>
+            <p class="text-slate-500">Data Umum Kabupaten Cianjur</p>
         </header>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="users" class="w-16 h-16 text-blue-600"></i></div>
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="users" class="w-12 h-12 text-blue-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Total Pengurus</p>
-                <p id="totalAll" class="text-4xl font-extrabold text-blue-600 mt-2">...</p>
-                <p class="text-xs text-slate-400 mt-1">Data masuk sistem</p>
+                <p id="totalAll" class="text-3xl font-extrabold text-blue-600 mt-2">...</p>
+                <p class="text-[10px] text-slate-400 mt-1">Data masuk sistem</p>
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="user-cog" class="w-16 h-16 text-orange-600"></i></div>
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="user-cog" class="w-12 h-12 text-orange-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Total Petugas</p>
-                <p id="totalUsers" class="text-4xl font-extrabold text-orange-600 mt-2">...</p>
-                <p class="text-xs text-slate-400 mt-1">Akun aktif</p>
+                <p id="totalUsers" class="text-3xl font-extrabold text-orange-600 mt-2">...</p>
+                <p class="text-[10px] text-slate-400 mt-1">Petugas lapangan aktif</p>
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="map" class="w-16 h-16 text-green-600"></i></div>
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="map-pin" class="w-12 h-12 text-purple-600"></i></div>
+                <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Cakupan Kec.</p>
+                <p id="totalKec" class="text-3xl font-extrabold text-purple-600 mt-2">...</p>
+                <p class="text-[10px] text-slate-400 mt-1">Dari total 32 Kecamatan</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="map" class="w-12 h-12 text-green-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Cakupan Desa</p>
-                <p id="totalDesa" class="text-4xl font-extrabold text-green-600 mt-2">...</p>
-                <p class="text-xs text-slate-400 mt-1">Desa terisi data</p>
+                <p id="totalDesa" class="text-3xl font-extrabold text-green-600 mt-2">...</p>
+                <p class="text-[10px] text-slate-400 mt-1">Dari total 360 Desa</p>
             </div>
         </div>
     </main>
@@ -58,10 +66,11 @@
                 const res = await fetch('/api/stats');
                 const data = await res.json();
                 
-                // Update UI
+                // Update UI dengan Data Baru
                 document.getElementById('totalAll').innerText = data.total_pengurus || '0';
                 document.getElementById('totalUsers').innerText = data.total_users || '0';
-                document.getElementById('totalDesa').innerText = (data.total_desa || '0') + ' Desa';
+                document.getElementById('totalKec').innerText = (data.total_kec || '0');
+                document.getElementById('totalDesa').innerText = (data.total_desa || '0');
             } catch (e) {
                 console.error("Gagal memuat statistik", e);
             }
