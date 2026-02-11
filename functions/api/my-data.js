@@ -2,7 +2,7 @@ export async function onRequestGet(context) {
     const { searchParams } = new URL(context.request.url);
     const username = searchParams.get('user');
     
-    // PERBAIKAN: Tambahkan JOIN ke tabel kecamatan (k) via tabel desa (d)
+    // PERBAIKAN: Tambahkan JOIN ke tabel kecamatan & ambil nama_kecamatan
     const { results } = await context.env.DB.prepare(`
         SELECT p.*, d.nama_desa, k.nama_kecamatan
         FROM pengurus p
