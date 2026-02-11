@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Users - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-50 lg:ml-64">
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
+        <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="/admin/pengurus.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="users"></i> Data Pengurus</a>
+            <a href="/admin/users.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="user-cog"></i> Manajemen User</a>
+            <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="settings"></i> Settings</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl mt-10"><i data-lucide="log-out"></i> Logout</button>
+        </nav>
+    </aside>
+
+    <main class="p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Manajemen Petugas</h1>
+            <button onclick="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2">
+                <i data-lucide="plus"></i> Tambah User
+            </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b">
+                    <tr><th class="p-4">ID</th><th class="p-4">Username</th><th class="p-4">Role</th><th class="p-4">Aksi</th></tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="modalUser" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Tambah User Baru</h3>
+            <div class="space-y-4">
+                <div><label class="block text-xs font-bold text-slate-500 uppercase">Username</label><input type="text" id="addUsername" class="w-full p-3 border rounded-xl"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase">Password</label><input type="password" id="addPassword" class="w-full p-3 border rounded-xl"></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase">Role</label>
+                    <select id="addRole" class="w-full p-3 border rounded-xl">
+                        <option value="user">Petugas Lapangan (User)</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-100 rounded-xl">Batal</button>
+                    <button onclick="saveUser()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users');
+            const users = await res.json();
+            const tbody = document.getElementById('userTable');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                tbody.innerHTML += `
+                <tr class="border-b last:border-0 hover:bg-slate-50">
+                    <td class="p-4 font-mono text-xs">${u.id}</td>
+                    <td class="p-4 font-bold">${u.username}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded bg-blue-100 text-blue-600 text-xs font-bold uppercase">${u.role}</span></td>
+                    <td class="p-4">
+                        <button onclick="deleteUser(${u.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            });
+            lucide.createIcons();
+        }
+
+        async function saveUser() {
+            const u = document.getElementById('addUsername').value;
+            const p = document.getElementById('addPassword').value;
+            const r = document.getElementById('addRole').value;
+            
+            if(!u || !p) return Swal.fire("Error", "Isi semua data", "warning");
+
+            const res = await fetch('/api/admin/users', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ username: u, password: p, role: r })
+            });
+            
+            if(res.ok) {
+                document.getElementById('modalUser').classList.add('hidden');
+                loadUsers();
+                Swal.fire("Sukses", "User ditambahkan", "success");
+            } else {
+                Swal.fire("Gagal", "Username mungkin sudah ada", "error");
+            }
+        }
+
+        async function deleteUser(id) {
+            if(!confirm("Hapus user ini?")) return;
+            await fetch('/api/admin/users', {
+                method: 'DELETE', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ id })
+            });
+            loadUsers();
+        }
+
+        function openModal() { document.getElementById('modalUser').classList.remove('hidden'); }
+        function logout() { localStorage.clear(); window.location.href='/index.html'; }
+        loadUsers();
+    </script>
+</body>
+</html>
