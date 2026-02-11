@@ -14,31 +14,83 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* --- FORMAT PRINT A4 LENGKAP --- */
+        /* --- FORMAT PRINT A4 LANDSCAPE (WAJIB) --- */
         @media print {
-            @page { size: A4 landscape; margin: 10mm; } /* Landscape agar tabel muat */
-            body { background: white; padding: 0; margin: 0; font-family: Arial, sans-serif; -webkit-print-color-adjust: exact; }
+            @page { 
+                size: A4 landscape; 
+                margin: 10mm; 
+            }
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0; 
+                font-family: Arial, sans-serif; 
+                -webkit-print-color-adjust: exact; 
+                color: black;
+            }
             
-            /* Sembunyikan elemen UI */
-            header, nav, #sec-dashboard, #sec-scan, #sec-hasil, #sec-profil, .no-print { display: none !important; }
+            /* Sembunyikan elemen Navigasi & UI Aplikasi */
+            header, nav, #sec-dashboard, #sec-scan, #sec-hasil, #sec-profil, .no-print, button { 
+                display: none !important; 
+            }
             
-            /* Tampilkan Area Laporan */
-            #sec-laporan { display: block !important; margin: 0 !important; padding: 0 !important; }
-            #printArea { display: block !important; box-shadow: none !important; border: none !important; }
+            /* Paksa Tampilkan Area Laporan */
+            #sec-laporan { 
+                display: block !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                visibility: visible !important;
+            }
             
-            /* Format Tabel Print */
-            table { width: 100%; border-collapse: collapse; font-size: 11px; }
-            thead { background-color: #e2e8f0 !important; color: black !important; }
-            th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
+            /* Format Tabel Cetak */
+            #printArea { 
+                display: block !important; 
+                box-shadow: none !important; 
+                border: none !important; 
+                width: 100% !important;
+            }
             
-            /* Pastikan tidak terpotong */
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 11px; 
+            }
+            
+            thead { 
+                display: table-header-group; 
+            }
+            
+            thead th { 
+                background-color: #f1f5f9 !important; 
+                color: black !important; 
+                font-weight: bold; 
+                border: 1px solid #000; 
+                padding: 8px;
+                text-align: center;
+            }
+            
+            tbody td { 
+                border: 1px solid #000; 
+                padding: 6px; 
+                text-align: left; 
+                vertical-align: top; 
+            }
+            
+            /* Cegah Baris Terpotong Halaman */
             tr { page-break-inside: avoid; }
             
-            /* Header Cetak */
-            .print-header { display: block !important; text-align: center; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
-            .print-header h1 { font-size: 18px; font-weight: bold; margin: 0; }
-            .print-header p { font-size: 12px; margin: 0; }
+            /* Header Khusus Cetak */
+            .print-header { 
+                display: block !important; 
+                text-align: center; 
+                margin-bottom: 20px; 
+                border-bottom: 2px solid black; 
+                padding-bottom: 10px; 
+            }
+            .print-header h1 { font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase; }
+            .print-header p { font-size: 12px; margin: 5px 0 0 0; }
         }
+        
         .print-header { display: none; }
     </style>
 </head>
@@ -51,7 +103,7 @@
                 <h1 class="text-2xl font-bold truncate w-48" id="userName">...</h1>
                 <p class="text-xs text-blue-100 mt-1 opacity-80" id="userRole">Petugas Lapangan</p>
             </div>
-            </div>
+        </div>
     </header>
 
     <main class="max-w-md mx-auto px-4 -mt-6 relative z-20">
@@ -126,7 +178,7 @@
                             <option value="Sekretaris">Sekretaris</option>
                             <option value="Bendahara">Bendahara</option>
                             <option value="Anggota">Anggota</option>
-                            <option value="Koordinator">Kordes</option>
+                            <option value="Koordinator">Koordinator Desa</option>
                         </select>
                     </div>
                 </div>
@@ -162,7 +214,7 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-lg text-slate-800">Unduh Laporan</h3>
-                        <p class="text-xs text-slate-500">Rekapitulasi data lengkap format A4</p>
+                        <p class="text-xs text-slate-500">Laporan lengkap format A4 Landscape</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -170,7 +222,7 @@
                         <i data-lucide="file-xls" class="w-4 h-4"></i> Excel
                     </button>
                     <button onclick="window.print()" class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all shadow-lg shadow-slate-200">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Print PDF
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print A4
                     </button>
                 </div>
             </div>
@@ -180,22 +232,21 @@
                     <h1>LAPORAN DATA PENGURUS</h1>
                     <p id="printSubtitle">Dicetak oleh: ...</p>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Lengkap</th>
-                                <th>NIK</th>
-                                <th>Jabatan</th>
-                                <th>Kecamatan</th> <th>Desa/Kel</th>
-                                <th>No HP</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableLaporanBody">
-                            </tbody>
-                    </table>
-                </div>
+                
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 25%;">Nama Lengkap</th>
+                            <th style="width: 15%;">NIK</th>
+                            <th style="width: 10%;">Jabatan</th>
+                            <th style="width: 15%;">Kecamatan</th> <th style="width: 15%;">Desa/Kel</th>
+                            <th style="width: 15%;">No HP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableLaporanBody">
+                        </tbody>
+                </table>
             </div>
         </section>
 
@@ -235,29 +286,24 @@
     </main>
 
     <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 pb-safe pt-2 px-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40 flex justify-between items-end">
-        
         <button onclick="navTo('dashboard')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="dashboard">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
             <span class="text-[9px] font-medium">Home</span>
         </button>
-
         <button onclick="navTo('laporan')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="laporan">
             <i data-lucide="file-text" class="w-5 h-5"></i>
             <span class="text-[9px] font-medium">Laporan</span>
         </button>
-
         <button onclick="navTo('scan')" class="bottom-nav-item flex-1 flex flex-col items-center justify-end z-50 -mt-8" data-target="scan">
             <div class="bg-blue-600 w-14 h-14 rounded-full shadow-lg shadow-blue-200 border-4 border-slate-50 text-white flex items-center justify-center transform active:scale-90 transition-all">
                 <i data-lucide="scan-line" class="w-7 h-7"></i>
             </div>
             <span class="text-[9px] font-bold text-blue-600 mt-1">SCAN</span>
         </button>
-
         <button onclick="navTo('hasil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="hasil">
             <i data-lucide="database" class="w-5 h-5"></i>
             <span class="text-[9px] font-medium">Data</span>
         </button>
-
         <button onclick="navTo('profil')" class="bottom-nav-item flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors" data-target="profil">
             <i data-lucide="user-circle" class="w-5 h-5"></i>
             <span class="text-[9px] font-medium">Profil</span>
@@ -270,7 +316,6 @@
                 <h3 class="font-bold text-lg" id="modalTitle">Konfirmasi Data</h3>
                 <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            
             <div class="p-6 overflow-y-auto flex-1 bg-slate-50 space-y-4">
                 <input type="hidden" id="editFotoUrl"><input type="hidden" id="editFotoOrangUrl">
                 <div class="grid grid-cols-2 gap-4">
@@ -315,6 +360,13 @@
         </div>
     </div>
 
+    <style>
+        .label-xs { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+        .input-field { width: 100%; padding: 10px; background-color: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 14px; outline: none; transition: all; }
+        .input-field:focus { ring: 2px; ring-color: #3b82f6; border-color: #3b82f6; }
+        .input-field:read-only { background-color: #f1f5f9; color: #94a3b8; cursor: default; }
+    </style>
+
     <script>
         lucide.createIcons();
         const user = JSON.parse(localStorage.getItem('user'));
@@ -331,13 +383,12 @@
         // INIT
         fetchMasterData();
         loadMyData();
-        navTo('dashboard'); // Default ke dashboard
+        navTo('dashboard'); 
 
         function navTo(targetId) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${targetId}`).classList.remove('hidden');
             
-            // Update Sticky Menu Active State
             document.querySelectorAll('.bottom-nav-item').forEach(el => {
                 el.classList.remove('active', 'text-blue-600');
                 if(el.dataset.target === targetId) el.classList.add('active', 'text-blue-600');
@@ -361,7 +412,7 @@
             document.getElementById('dashTotal').innerText = allData.length || '0';
         }
 
-        // --- SCAN LOGIC ---
+        // --- 1. SCAN LOGIC ---
         function previewImage(input, type) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
@@ -387,10 +438,12 @@
                 fileKtp = null; base64Ktp = "";
                 document.getElementById('previewKtpContainer').classList.add('hidden');
                 document.getElementById('btnKtpPlaceholder').classList.remove('hidden');
+                document.getElementById('inputKtpKamera').value = "";
             } else {
                 fileOrang = null;
                 document.getElementById('previewOrangContainer').classList.add('hidden');
                 document.getElementById('btnOrangPlaceholder').classList.remove('hidden');
+                document.getElementById('inputOrangKamera').value = "";
             }
         }
 
@@ -428,7 +481,7 @@
             finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`; lucide.createIcons(); }
         }
 
-        // --- MODAL & DATA SAVING ---
+        // --- 2. MODAL LOGIC ---
         async function openDetailModal(data, isReadOnlyMode) {
             currentDetailId = data.id || null;
             document.getElementById('displayKtp').src = data.foto_url;
@@ -509,7 +562,7 @@
             } catch(e) { Swal.fire("Gagal", e.message, "error"); }
         }
 
-        async function uploadNewFotoOrang(input) { /* Logic sama */ 
+        async function uploadNewFotoOrang(input) { 
             if (!input.files || !input.files[0]) return;
             const loading = Swal.fire({title: 'Update Foto...', didOpen: () => Swal.showLoading()});
             try {
@@ -531,11 +584,9 @@
 
         function closeModal() { document.getElementById('modalConfirm').classList.add('hidden'); }
 
-        // --- LIST & PRINT LOGIC ---
+        // --- 3. LIST, PRINT & EXPORT LOGIC ---
         async function loadMyData() {
-            // Tampilkan loading jika data kosong
             if(allData.length === 0) document.getElementById('listContainer').innerHTML = '<div class="text-center py-10"><span class="animate-spin">🌀</span></div>';
-            
             try {
                 const res = await fetch(`/api/my-data?user=${user.username}`);
                 allData = await res.json();
@@ -557,6 +608,9 @@
             if (paginated.length === 0) { container.innerHTML = '<p class="text-center text-slate-400 py-10">Data tidak ditemukan</p>'; return; }
 
             paginated.forEach(item => {
+                // Pastikan nama kecamatan muncul, jika tidak ada fallback ke 'Kecamatan'
+                const kec = item.nama_kecamatan || 'Kecamatan'; 
+                
                 container.innerHTML += `
                     <div onclick='openDetailFromList(${JSON.stringify(item)})' class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
                         <img src="${item.foto_url}" class="w-12 h-12 rounded-lg object-cover bg-slate-100">
@@ -564,7 +618,7 @@
                             <p class="font-bold text-slate-800 text-sm truncate">${item.nama}</p>
                             <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
                                 <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">${item.jabatan}</span>
-                                <span class="truncate">${item.nama_desa || 'Desa'} - ${item.nama_kecamatan || 'Kecamatan'}</span>
+                                <span class="truncate">${item.nama_desa || 'Desa'} - ${kec}</span>
                             </div>
                         </div>
                         <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
@@ -578,7 +632,7 @@
         function renderTableLaporan() {
             const body = document.getElementById('tableLaporanBody');
             body.innerHTML = '';
-            // Gunakan allData yang sudah difilter oleh creator di backend
+            
             allData.forEach((item, index) => {
                 body.innerHTML += `
                     <tr>
@@ -586,8 +640,7 @@
                         <td>${item.nama}</td>
                         <td style="font-family: monospace;">${item.nik}</td>
                         <td>${item.jabatan}</td>
-                        <td>${item.nama_kecamatan || '-'}</td>
-                        <td>${item.nama_desa}</td>
+                        <td>${item.nama_kecamatan || '-'}</td> <td>${item.nama_desa || '-'}</td>
                         <td>${item.no_hp}</td>
                     </tr>`;
             });
@@ -595,18 +648,23 @@
 
         function downloadExcel() {
             if (allData.length === 0) return Swal.fire("Kosong", "Tidak ada data untuk diexport", "info");
+            
             const dataToExport = allData.map((item, idx) => ({
                 "No": idx + 1,
                 "Nama Lengkap": item.nama,
                 "NIK": item.nik,
                 "Jabatan": item.jabatan,
-                "Kecamatan": item.nama_kecamatan || "-", // Pastikan muncul
+                "Kecamatan": item.nama_kecamatan || "-", // SUDAH DIPERBAIKI
                 "Desa": item.nama_desa,
                 "No HP": item.no_hp,
-                "TTL": `${item.tempat_lahir}, ${item.tanggal_lahir}`,
+                "Tempat Lahir": item.tempat_lahir,
+                "Tanggal Lahir": item.tanggal_lahir,
                 "Alamat": item.alamat,
+                "Foto KTP": item.foto_url,
+                "Foto Selfie": item.foto_orang_url,
                 "Waktu Input": item.created_at
             }));
+
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Data Pengurus");
