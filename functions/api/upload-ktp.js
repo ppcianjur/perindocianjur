@@ -10,34 +10,37 @@ export async function onRequestPost(context) {
         const jabatan = formData.get('jabatan');   
         const creator = formData.get('creator');   
 
-        // 1. SIGNED UPLOAD CLOUDINARY
+        // 1. AMBIL CONFIG CLOUDINARY DARI DB
+        const config = await env.DB.prepare("SELECT * FROM settings").all();
+        const settings = Object.fromEntries(config.results.map(r => [r.key_name, r.key_value]));
+
+        // 2. SIGNED UPLOAD CLOUDINARY
         const timestamp = Math.round(new Date().getTime() / 1000).toString();
         const publicId = `ktp_${Date.now()}`;
-        const paramsToSign = `format=webp&public_id=${publicId}&timestamp=${timestamp}${env.CLOUDINARY_API_SECRET}`;
+        const paramsToSign = `format=webp&public_id=${publicId}&timestamp=${timestamp}${settings.CLOUDINARY_API_SECRET}`;
         const signature = await sha1(paramsToSign);
 
         const cloudiFormData = new FormData();
         cloudiFormData.append('file', imageFile);
-        cloudiFormData.append('api_key', env.CLOUDINARY_API_KEY);
+        cloudiFormData.append('api_key', settings.CLOUDINARY_API_KEY);
         cloudiFormData.append('timestamp', timestamp);
         cloudiFormData.append('public_id', publicId);
         cloudiFormData.append('format', 'webp');
         cloudiFormData.append('signature', signature);
 
-        const cloudiRes = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        const cloudiRes = await fetch(`https://api.cloudinary.com/v1_1/${settings.CLOUDINARY_CLOUD_NAME}/image/upload`, {
             method: 'POST', body: cloudiFormData
         });
         const cloudiJson = await cloudiRes.json();
 
-        // 2. GEMINI OCR (Menggunakan Prompt Ketat dari Utils)
-        // Data yang kembali: nik, nama, tempat_lahir, tanggal_lahir, alamat, rt, rw, kelurahan, kecamatan
-        const ktp = await extractKTPData(base64Data, env.GEMINI_API_KEY);
+        // 3. GEMINI OCR (Kirim env.DB ke Utils)
+        const ktp = await extractKTPData(base64Data, env.DB);
 
-        // 3. PENCARIAN KODE DESA (Mencocokkan 'kelurahan' hasil AI ke tabel 'desa')
+        // 4. PENCARIAN KODE DESA (KONSISTEN: KTP Kelurahan -> DB nama_desa)
         const desaRow = await env.DB.prepare("SELECT kode_desa_lengkap FROM desa WHERE nama_desa LIKE ? LIMIT 1")
             .bind(`%${ktp.kelurahan}%`).first();
 
-        // 4. SIMPAN LENGKAP KE DATABASE
+        // 5. SIMPAN KE DATABASE
         await env.DB.prepare(`
             INSERT INTO pengurus (
                 nik, nama, tempat_lahir, tanggal_lahir, no_hp, 
@@ -46,19 +49,9 @@ export async function onRequestPost(context) {
             ) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
-            ktp.nik, 
-            ktp.nama, 
-            ktp.tempat_lahir,
-            ktp.tanggal_lahir,
-            noHp, 
-            jabatan, 
-            ktp.alamat,
-            ktp.rt,
-            ktp.rw,
-            ktp.kelurahan,
-            desaRow?.kode_desa_lengkap || null, 
-            cloudiJson.secure_url,
-            creator
+            ktp.nik, ktp.nama, ktp.tempat_lahir, ktp.tanggal_lahir, noHp, 
+            jabatan, ktp.alamat, ktp.rt, ktp.rw, ktp.kelurahan,
+            desaRow?.kode_desa_lengkap || null, cloudiJson.secure_url, creator
         ).run();
 
         return new Response(JSON.stringify({ success: true, data: ktp }), {
