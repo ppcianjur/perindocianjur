@@ -9,39 +9,45 @@ export async function sha1(str) {
 }
 
 export async function extractKTPData(base64Image, db) {
-    // Ambil API KEY dari tabel settings
     const setting = await db.prepare("SELECT key_value FROM settings WHERE key_name = 'GEMINI_API_KEY'").first();
     const apiKey = setting?.key_value;
 
-    if (!apiKey) throw new Error("GEMINI_API_KEY tidak ditemukan di database!");
+    if (!apiKey) throw new Error("API Key tidak ditemukan di Database.");
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
-    const strictPrompt = `Anda adalah asisten OCR khusus untuk KTP Indonesia. Tugas Anda adalah mengekstrak data dari gambar KTP secara akurat.
+    const strictPrompt = `Anda adalah asisten OCR khusus untuk KTP Indonesia. Ekstrak data: nik (16 digit), nama, tempat_lahir, tanggal_lahir (DD-MM-YYYY), alamat, rt, rw, kelurahan, kecamatan. Output HANYA JSON mentah tanpa markdown.`;
 
-Ekstrak: NIK (16 digit), Nama, Tempat Lahir, Tanggal Lahir, Alamat, RT, RW, Kelurahan, Kecamatan.
-Format Tanggal harus: DD-MM-YYYY.
-Jika ada teks yang buram, tulis 'TIDAK TERBACA'.
-HANYA berikan output dalam format JSON mentah tanpa penjelasan atau markdown seperti ini:
-{"nik": "...", "nama": "...", "tempat_lahir": "...", "tanggal_lahir": "...", "alamat": "...", "rt": "...", "rw": "...", "kelurahan": "...", "kecamatan": "..."}`;
+    const payload = {
+        contents: [{
+            parts: [
+                { text: strictPrompt },
+                { inline_data: { mime_type: "image/jpeg", data: base64Image.trim() } }
+            ]
+        }],
+        generationConfig: {
+            temperature: 0.1,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 1024,
+        }
+    };
 
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{
-                parts: [
-                    { text: strictPrompt },
-                    { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                ]
-            }]
-        })
+        body: JSON.stringify(payload)
     });
 
     const result = await response.json();
     
-    if (!result.candidates || result.candidates.length === 0) {
-        throw new Error("Gemini tidak memberikan respon. Periksa kuota API Key.");
+    // Jika Gemini kirim error balik (misal: API Key salah atau Model busy)
+    if (result.error) {
+        throw new Error(`Gemini API Error: ${result.error.message}`);
+    }
+
+    if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+        throw new Error("Gemini gagal mengenali gambar. Pastikan foto KTP jelas dan terang.");
     }
 
     const textResponse = result.candidates[0].content.parts[0].text;
@@ -50,6 +56,6 @@ HANYA berikan output dalam format JSON mentah tanpa penjelasan atau markdown sep
         const cleanJson = textResponse.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanJson);
     } catch (e) {
-        throw new Error("Gagal parsing JSON AI. Coba foto lebih jelas.");
+        throw new Error("Gagal memproses data KTP. Silakan ulangi foto.");
     }
 }
