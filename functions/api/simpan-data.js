@@ -3,25 +3,24 @@ export async function onRequestPost(context) {
         const req = await context.request.json();
         const db = context.env.DB;
 
-        // Validasi Wajib
+        // Validasi data kritis
         if (!req.nik || !req.nama || !req.kode_desa_lengkap) {
             return new Response(JSON.stringify({ 
                 success: false, 
-                error: "Data NIK, Nama, dan Desa wajib diisi." 
+                error: "Data NIK, Nama, dan Desa (Database) wajib diisi!" 
             }), { status: 400 });
         }
 
-        // Cek duplikasi NIK
+        // Cek Duplikat NIK
         const exist = await db.prepare("SELECT nik FROM pengurus WHERE nik = ?").bind(req.nik).first();
         if (exist) {
             return new Response(JSON.stringify({ 
                 success: false, 
-                error: "NIK sudah terdaftar sebelumnya." 
+                error: `NIK ${req.nik} sudah terdaftar a.n ${exist.nama}` 
             }), { status: 409 });
         }
 
-        // Query Insert sesuai struktur tabel perindo1.sql
-        // Kita simpan kode_desa_lengkap sebagai Foreign Key
+        // Query Insert
         const query = `
             INSERT INTO pengurus (
                 nik, nama, tempat_lahir, tanggal_lahir, 
@@ -40,8 +39,8 @@ export async function onRequestPost(context) {
                 req.alamat, 
                 req.rt, 
                 req.rw, 
-                req.nama_desa, // Simpan nama teksnya juga untuk display cepat (opsional, sesuai kolom kelurahan)
-                req.kode_desa_lengkap, // INI PENTING (Foreign Key)
+                req.nama_desa, 
+                req.kode_desa_lengkap, 
                 req.foto_url, 
                 req.no_hp, 
                 req.jabatan, 
@@ -52,7 +51,6 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ success: true }));
 
     } catch (err) {
-        console.error("DB Error:", err);
         return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500 });
     }
 }
