@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pendataan Cianjur Update</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full"></div>
+        
+        <div class="relative">
+            <div class="text-center mb-10">
+                <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+                    <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Cianjur <span class="text-blue-600">Update</span></h1>
+                <p class="text-slate-500 mt-2 font-medium">Sistem Pendataan Pengurus</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-2 tracking-widest">Username</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-4 top-3.5 w-5 h-5 text-slate-400"></i>
+                        <input type="text" id="username" required placeholder="Masukkan username" 
+                            class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-2 tracking-widest">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-4 top-3.5 w-5 h-5 text-slate-400"></i>
+                        <input type="password" id="password" required placeholder="••••••••" 
+                            class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all">
+                    </div>
+                </div>
+
+                <div id="errorMsg" class="hidden bg-red-50 text-red-600 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span id="msg">Username atau Password salah!</span>
+                </div>
+
+                <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-100 active:scale-[0.98] flex items-center justify-center gap-2">
+                    <span>Masuk ke Sistem</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </form>
+
+            <footer class="mt-8 text-center">
+                <p class="text-slate-400 text-xs font-medium">© 2026 Tim IT Cianjur Update</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Icon Lucide
+        lucide.createIcons();
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            const errorBox = document.getElementById('errorMsg');
+            const msg = document.getElementById('msg');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin mr-2">🌀</span> Memverifikasi...`;
+
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // Simpan data user ke localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect sesuai Role
+                    if (data.user.role === 'admin') {
+                        window.location.href = '/admin/dashboard.html';
+                    } else {
+                        window.location.href = '/user.html';
+                    }
+                } else {
+                    throw new Error(data.error || "Login Gagal");
+                }
+            } catch (err) {
+                msg.innerText = err.message;
+                errorBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = `<span>Masuk ke Sistem</span><i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>`;
+                lucide.createIcons();
+            }
+        };
+
+        // Cek jika sudah login, langsung lempar ke halaman yang sesuai
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                window.location.href = user.role === 'admin' ? '/admin/dashboard.html' : '/user.html';
+            }
+        }
+    </script>
+</body>
+</html>
