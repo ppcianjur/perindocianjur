@@ -2,9 +2,9 @@ export async function onRequest(context) {
     const { request, env } = context;
     const db = env.DB;
 
-    // GET: Ambil daftar user
+    // GET: Ambil daftar user (HANYA PETUGAS / ROLE 'USER')
     if (request.method === "GET") {
-        const { results } = await db.prepare("SELECT id, username, role FROM users ORDER BY id DESC").all();
+        const { results } = await db.prepare("SELECT id, username, role FROM users WHERE role = 'user' ORDER BY id DESC").all();
         return new Response(JSON.stringify(results), { headers: { "Content-Type": "application/json" } });
     }
 
