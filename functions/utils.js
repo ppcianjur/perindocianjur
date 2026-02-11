@@ -4,23 +4,23 @@ export async function extractKTPData(base64Image, db) {
 
     if (!apiKey) throw new Error("API Key Gemini tidak ditemukan di tabel settings.");
 
-    // Gunakan versi v1 (lebih stabil) dan path model yang benar
+    // Gunakan v1 standar
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const payload = {
         contents: [{
             parts: [
-                { text: "Anda adalah asisten OCR KTP Indonesia. Ekstrak data: nik, nama, tempat_lahir, tanggal_lahir (DD-MM-YYYY), alamat, rt, rw, kelurahan, kecamatan. HANYA JSON mentah tanpa markdown." },
+                { text: "Ekstrak data KTP: nik, nama, tempat_lahir, tanggal_lahir (DD-MM-YYYY), alamat, rt, rw, kelurahan, kecamatan. HANYA berikan output JSON mentah tanpa markdown atau teks lain." },
                 { inline_data: { mime_type: "image/jpeg", data: base64Image } }
             ]
         }],
         generationConfig: {
-            temperature: 0.1,
-            response_mime_type: "application/json" // Memaksa output JSON jika didukung
+            temperature: 0.1
+            // Field responseMimeType dihapus untuk menghindari error skema API v1
         }
     };
 
-    console.log("Menghubungi Gemini v1...");
+    console.log("Mengirim request ke Gemini v1...");
 
     const response = await fetch(url, {
         method: 'POST',
@@ -31,27 +31,26 @@ export async function extractKTPData(base64Image, db) {
     const result = await response.json();
 
     if (result.error) {
-        console.error("Gemini Error Detail:", result.error);
+        console.error("Gemini Error:", result.error);
         throw new Error(`Gemini Error (${result.error.code}): ${result.error.message}`);
     }
 
     if (!result.candidates || !result.candidates[0].content.parts[0].text) {
-        throw new Error("Gemini tidak memberikan hasil ekstraksi.");
+        throw new Error("AI tidak memberikan respon teks. Coba foto lebih jelas.");
     }
 
-    let textResponse = result.candidates[0].content.parts[0].text;
+    const textResponse = result.candidates[0].content.parts[0].text;
     
     try {
-        // Membersihkan jika masih ada backticks
+        // Membersihkan karakter aneh atau markdown yang mungkin diselipkan AI
         const cleanJson = textResponse.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanJson);
     } catch (e) {
-        console.error("Raw AI Response:", textResponse);
-        throw new Error("Format JSON AI rusak. Coba foto lebih tegak.");
+        console.error("Gagal parse JSON. Raw:", textResponse);
+        throw new Error("Format data AI tidak valid. Ulangi pengambilan foto.");
     }
 }
 
-// Fungsi sha1 tetap sama
 export async function sha1(str) {
     const buffer = new TextEncoder().encode(str);
     const hash = await crypto.subtle.digest('SHA-1', buffer);
