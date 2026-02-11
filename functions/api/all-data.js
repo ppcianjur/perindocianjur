@@ -4,11 +4,12 @@ export async function onRequestGet(context) {
     const desa = searchParams.get('desa');
     const db = context.env.DB;
 
+    // UPDATE: Gunakan LEFT JOIN agar data tidak hilang jika kode wilayah bermasalah
     let query = `
         SELECT p.*, d.nama_desa, k.nama_kecamatan 
         FROM pengurus p
-        JOIN desa d ON p.kode_desa_lengkap = d.kode_desa_lengkap
-        JOIN kecamatan k ON d.kode_kec = k.kode_kec
+        LEFT JOIN desa d ON p.kode_desa_lengkap = d.kode_desa_lengkap
+        LEFT JOIN kecamatan k ON d.kode_kec = k.kode_kec
         WHERE 1=1
     `;
 
