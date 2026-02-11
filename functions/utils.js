@@ -1,12 +1,13 @@
 export async function extractKTPData(base64Image, db) {
     const setting = await db.prepare("SELECT key_value FROM settings WHERE key_name = 'GEMINI_API_KEY'").first();
-    const apiKey = setting?.key_value;
+    // Tambahkan .trim() untuk membuang spasi/newline yang mungkin terbawa dari database
+    const apiKey = setting?.key_value?.trim();
 
     if (!apiKey) throw new Error("API Key tidak ditemukan.");
 
-    // URL v1beta dengan prefix models/gemini-1.5-flash
-    // Ini adalah endpoint paling fleksibel untuk API Key baru
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // PERBAIKAN: Menggunakan versi spesifik 'gemini-1.5-flash-001' atau 'gemini-1.5-flash-latest'
+    // Alias 'gemini-1.5-flash' terkadang return 404 jika endpoint sedang update
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
     
     const payload = {
         contents: [{
