@@ -1,0 +1,13 @@
+{
+  "name": "cianjur-pengurus-apps",
+  "version": "1.0.0",
+  "description": "Aplikasi Pendataan Pengurus Cianjur dengan Cloudflare Pages & Gemini AI",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^4.64.0"
+  }
+}
