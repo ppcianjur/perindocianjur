@@ -1,0 +1,19 @@
+name = "pengurus-perindo-cianjur"
+compatibility_date = "2024-04-03"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "perindo"
+database_id = "c75d877c-ec05-4afc-b1d8-915ff3dd9002"
+
+[vars]
+# Pakai cara Signed Upload (Lebih Aman)
+CLOUDINARY_CLOUD_NAME = "dqogi4al8"
+CLOUDINARY_API_KEY = "914369272667668"
+CLOUDINARY_API_SECRET = "nlkkGUcAJD_JySyn60QC82tcMVI"
+# Pengaturan Gemini AI
+GEMINI_API_KEY = "AIzaSyAfJABdBgKLwKevrZIxgFv8kbGGWQQNtXs"
+
+# Rahasia untuk JWT/Auth (Ganti dengan string random yang panjang)
+JWT_SECRET = "CianjurBersemi1CianjurBersemi2CianjurBersemi3"
