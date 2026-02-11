@@ -7,6 +7,28 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-50 lg:ml-64">
+    
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
+        <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </a>
+            <a href="/admin/pengurus.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50">
+                <i data-lucide="users"></i> Data Pengurus
+            </a>
+            <a href="/admin/users.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50">
+                <i data-lucide="user-cog"></i> Manajemen User
+            </a>
+            <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg">
+                <i data-lucide="settings"></i> Settings
+            </a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl mt-10">
+                <i data-lucide="log-out"></i> Logout
+            </button>
+        </nav>
+    </aside>
+
     <main class="p-8 flex flex-col items-center justify-center min-h-[80vh]">
         <div class="bg-white p-12 rounded-3xl border border-dashed border-slate-300 text-center max-w-md">
             <i data-lucide="shield-alert" class="w-16 h-16 text-slate-300 mx-auto mb-4"></i>
@@ -14,6 +36,13 @@
             <p class="text-slate-500 mt-2 text-sm">Halaman pengaturan API (Gemini & Cloudinary) sedang dalam tahap finalisasi keamanan.</p>
         </div>
     </main>
-    <script>lucide.createIcons();</script>
+
+    <script>
+        lucide.createIcons();
+        function logout() { 
+            localStorage.clear(); 
+            window.location.href = '/index.html'; 
+        }
+    </script>
 </body>
 </html>
