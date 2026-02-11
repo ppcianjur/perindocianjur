@@ -7,12 +7,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .bottom-nav-item.active { color: #2563eb; }
         .bottom-nav-item.active span { font-weight: bold; }
-        /* Hide scrollbar for clean UI */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Styles khusus untuk PDF/Print */
+        @media print {
+            body { background: white; padding: 0; }
+            header, nav, #sec-dashboard, #sec-scan, #sec-hasil, .no-print { display: none !important; }
+            #sec-laporan { display: block !important; }
+            #printArea { display: block !important; }
+            .page-section { display: block !important; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; }
+            th, td { border: 1px solid #ddd; padding: 4px; text-align: left; }
+            th { background-color: #f0f0f0; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 pb-28 select-none">
@@ -63,12 +75,10 @@
             
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                 <h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="credit-card" class="w-4 h-4 text-blue-500"></i> Foto KTP (Wajib)</h3>
-                
                 <div id="previewKtpContainer" class="hidden relative mb-3 group">
                     <img id="imgPreviewKtp" class="w-full h-48 object-cover rounded-xl shadow border-2 border-slate-100">
                     <button onclick="resetFoto('ktp')" class="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
-
                 <div id="btnKtpPlaceholder" class="grid grid-cols-2 gap-3">
                     <button onclick="document.getElementById('inputKtpKamera').click()" class="py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-blue-100"><i data-lucide="camera" class="w-5 h-5"></i> Kamera</button>
                     <button onclick="document.getElementById('inputKtpGaleri').click()" class="py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-slate-100"><i data-lucide="image" class="w-5 h-5"></i> Galeri</button>
@@ -78,15 +88,11 @@
             </div>
 
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-                <h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2">
-                    <i data-lucide="user" class="w-4 h-4 text-green-500"></i> Foto Selfie (Opsional)
-                </h3>
-                
+                <h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-green-500"></i> Foto Selfie (Opsional)</h3>
                 <div id="previewOrangContainer" class="hidden relative mb-3 group">
                     <img id="imgPreviewOrang" class="w-full h-48 object-cover rounded-xl shadow border-2 border-slate-100">
                     <button onclick="resetFoto('orang')" class="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
-
                 <div id="btnOrangPlaceholder" class="grid grid-cols-2 gap-3">
                     <button onclick="document.getElementById('inputOrangKamera').click()" class="py-3 bg-green-50 text-green-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-green-100"><i data-lucide="camera" class="w-5 h-5"></i> Kamera</button>
                     <button onclick="document.getElementById('inputOrangGaleri').click()" class="py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-slate-100"><i data-lucide="image" class="w-5 h-5"></i> Galeri</button>
@@ -122,11 +128,9 @@
         <section id="sec-hasil" class="page-section hidden space-y-4 animate-in fade-in duration-300">
             <div class="flex justify-between items-center px-1">
                 <h3 class="font-bold text-slate-700">Data Tersimpan</h3>
-                <input type="text" id="searchBox" placeholder="Cari nama..." class="px-3 py-1.5 rounded-full border border-slate-200 text-xs w-32 focus:w-48 transition-all outline-none" onkeyup="filterData()">
+                <input type="text" id="searchBox" placeholder="Cari nama..." class="px-3 py-1.5 rounded-full border border-slate-200 text-xs w-32 focus:w-48 transition-all outline-none" onkeyup="renderList()">
             </div>
-            
             <div id="listContainer" class="space-y-3 min-h-[300px]"></div>
-            
             <div id="pagination" class="flex justify-center items-center gap-2 pt-4 hidden">
                 <button onclick="prevPage()" class="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50" id="btnPrev"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                 <span id="pageInfo" class="text-xs font-bold text-slate-500">Hal 1</span>
@@ -135,13 +139,43 @@
         </section>
 
         <section id="sec-laporan" class="page-section hidden animate-in fade-in duration-300">
-            <div class="bg-white p-8 rounded-3xl text-center border border-slate-200">
-                <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="file-spreadsheet" class="w-10 h-10 text-blue-600"></i>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 no-print">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                        <i data-lucide="file-spreadsheet" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Unduh Data</h3>
+                        <p class="text-xs text-slate-500">Download data dalam format Excel atau PDF</p>
+                    </div>
                 </div>
-                <h3 class="font-bold text-lg text-slate-800">Laporan Data</h3>
-                <p class="text-sm text-slate-500 mb-6">Fitur unduh laporan dalam format Excel/PDF akan segera tersedia.</p>
-                <button class="px-6 py-2 bg-slate-100 text-slate-400 font-bold rounded-xl text-sm cursor-not-allowed">Download Report</button>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="downloadExcel()" class="flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all shadow-lg shadow-green-100">
+                        <i data-lucide="file-xls" class="w-4 h-4"></i> Export Excel
+                    </button>
+                    <button onclick="window.print()" class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all shadow-lg shadow-slate-200">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print / PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="printArea" class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <h4 class="font-bold text-center mb-4 text-slate-700 border-b pb-2">Laporan Data Pengurus</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-2">Nama</th>
+                                <th class="p-2">NIK</th>
+                                <th class="p-2">Jabatan</th>
+                                <th class="p-2">Desa</th>
+                                <th class="p-2">No HP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableLaporanBody" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -160,7 +194,7 @@
         </button>
         <button onclick="navTo('hasil')" class="bottom-nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-blue-600 transition-colors" data-target="hasil">
             <i data-lucide="database" class="w-6 h-6"></i>
-            <span class="text-[10px] font-medium">Data Saya</span>
+            <span class="text-[10px] font-medium">Data</span>
         </button>
         <button onclick="navTo('laporan')" class="bottom-nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-blue-600 transition-colors" data-target="laporan">
             <i data-lucide="file-text" class="w-6 h-6"></i>
@@ -207,42 +241,22 @@
                         <label class="label-xs">Nama Lengkap</label>
                         <input id="editNama" type="text" class="input-field font-bold uppercase">
                     </div>
-                    
                     <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200 space-y-2">
                          <label class="label-xs text-yellow-700">Kecamatan & Desa (Database)</label>
                          <select id="editKec" onchange="loadDesaOptions(this.value)" class="input-field bg-white mb-2"></select>
                          <select id="editDesa" class="input-field bg-white"></select>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="label-xs">Tempat Lahir</label>
-                            <input id="editTempatLahir" type="text" class="input-field">
-                        </div>
-                        <div>
-                            <label class="label-xs">Tgl Lahir</label>
-                            <input id="editTglLahir" type="text" class="input-field">
-                        </div>
+                        <div><label class="label-xs">Tempat Lahir</label><input id="editTempatLahir" type="text" class="input-field"></div>
+                        <div><label class="label-xs">Tgl Lahir</label><input id="editTglLahir" type="text" class="input-field"></div>
                     </div>
-                    
-                    <div>
-                        <label class="label-xs">Alamat</label>
-                        <textarea id="editAlamat" rows="2" class="input-field"></textarea>
-                    </div>
-
+                    <div><label class="label-xs">Alamat</label><textarea id="editAlamat" rows="2" class="input-field"></textarea></div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="label-xs">No. HP</label>
-                            <input id="editNoHp" type="tel" class="input-field">
-                        </div>
+                        <div><label class="label-xs">No. HP</label><input id="editNoHp" type="tel" class="input-field"></div>
                         <div>
                             <label class="label-xs">Jabatan</label>
                             <select id="editJabatan" class="input-field">
-                                <option value="Ketua">Ketua</option>
-                                <option value="Sekretaris">Sekretaris</option>
-                                <option value="Bendahara">Bendahara</option>
-                                <option value="Anggota">Anggota</option>
-                                <option value="Koordinator">Kordes</option>
+                                <option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option><option value="Koordinator">Kordes</option>
                             </select>
                         </div>
                     </div>
@@ -270,31 +284,22 @@
         if(!user) window.location.href = '/index.html';
         document.getElementById('userName').innerText = user.username;
 
-        // --- STATE VARIABLES ---
-        let fileKtp = null;
-        let fileOrang = null;
-        let base64Ktp = "";
-        let listKecamatan = [];
-        
-        let allData = [];
-        let currentPage = 1;
+        let fileKtp = null, fileOrang = null, base64Ktp = "";
+        let listKecamatan = [], allData = [];
+        let currentPage = 1, currentDetailId = null;
         const rowsPerPage = 10;
-        let currentDetailId = null; // ID data yang sedang dilihat detilnya
 
-        // --- INIT ---
+        // INIT
         fetchMasterData();
         loadMyData();
 
-        // --- NAVIGATION LOGIC ---
         function navTo(targetId) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${targetId}`).classList.remove('hidden');
-            
             document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active', 'text-blue-600'));
             document.querySelector(`[data-target="${targetId}"]`).classList.add('active', 'text-blue-600');
-            
             if(targetId === 'dashboard') loadStats();
-            if(targetId === 'hasil') loadMyData();
+            if(targetId === 'hasil' || targetId === 'laporan') loadMyData(); // Reload data untuk laporan juga
         }
 
         async function fetchMasterData() {
@@ -304,16 +309,14 @@
                 const selKec = document.getElementById('editKec');
                 selKec.innerHTML = '<option value="">- Pilih Kecamatan -</option>';
                 listKecamatan.forEach(k => selKec.innerHTML += `<option value="${k.kode_kec}">${k.nama_kecamatan}</option>`);
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         async function loadStats() {
-            // Sederhana: hitung dari allData jika sudah load, atau fetch count khusus
             document.getElementById('dashTotal').innerText = allData.length || '-';
-            // Logic hari ini bisa difilter dari created_at
         }
 
-        // --- 1. HANDLING INPUT FOTO ---
+        // --- SCAN LOGIC ---
         function previewImage(input, type) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
@@ -323,8 +326,7 @@
                         document.getElementById('imgPreviewKtp').src = e.target.result;
                         document.getElementById('previewKtpContainer').classList.remove('hidden');
                         document.getElementById('btnKtpPlaceholder').classList.add('hidden');
-                        fileKtp = file;
-                        base64Ktp = e.target.result.split(',')[1];
+                        fileKtp = file; base64Ktp = e.target.result.split(',')[1];
                     } else {
                         document.getElementById('imgPreviewOrang').src = e.target.result;
                         document.getElementById('previewOrangContainer').classList.remove('hidden');
@@ -335,22 +337,18 @@
                 reader.readAsDataURL(file);
             }
         }
-        
         function resetFoto(type) {
             if (type === 'ktp') {
                 fileKtp = null; base64Ktp = "";
                 document.getElementById('previewKtpContainer').classList.add('hidden');
                 document.getElementById('btnKtpPlaceholder').classList.remove('hidden');
-                document.getElementById('inputKtpKamera').value = "";
             } else {
                 fileOrang = null;
                 document.getElementById('previewOrangContainer').classList.add('hidden');
                 document.getElementById('btnOrangPlaceholder').classList.remove('hidden');
-                document.getElementById('inputOrangKamera').value = "";
             }
         }
 
-        // --- 2. PROSES SCAN & UPLOAD ---
         async function prosesScan() {
             if (!fileKtp) return Swal.fire("Wajib", "Foto KTP tidak boleh kosong!", "warning");
             const hp = document.getElementById('noHp').value;
@@ -358,11 +356,9 @@
             if (!hp || !jab) return Swal.fire("Wajib", "No HP dan Jabatan harus diisi!", "warning");
 
             const btn = document.getElementById('btnProses');
-            btn.disabled = true;
-            btn.innerHTML = `🌀 Memproses...`;
+            btn.disabled = true; btn.innerHTML = `🌀 Memproses...`;
 
             try {
-                // Upload Foto Orang dulu (jika ada) karena tidak butuh OCR
                 let fotoOrangUrl = "";
                 if (fileOrang) {
                     const fdOrang = new FormData();
@@ -372,7 +368,6 @@
                     if(jsonOrang.success) fotoOrangUrl = jsonOrang.url;
                 }
 
-                // Upload KTP & OCR
                 const fdKtp = new FormData();
                 fdKtp.append('foto', fileKtp);
                 fdKtp.append('base64', base64Ktp);
@@ -380,50 +375,26 @@
                 
                 const resKtp = await fetch('/api/upload-ktp', { method: 'POST', body: fdKtp });
                 const jsonKtp = await resKtp.json();
-
                 if (!jsonKtp.success) throw new Error(jsonKtp.error);
 
-                // Buka Modal Konfirmasi
-                openDetailModal({
-                    ...jsonKtp.data,
-                    foto_url: jsonKtp.foto_url,
-                    foto_orang_url: fotoOrangUrl,
-                    no_hp: hp,
-                    jabatan: jab
-                }, false); // false = mode Input Baru (bisa edit semua)
+                openDetailModal({...jsonKtp.data, foto_url: jsonKtp.foto_url, foto_orang_url: fotoOrangUrl, no_hp: hp, jabatan: jab}, false);
 
-            } catch (e) {
-                Swal.fire("Error", e.message, "error");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`;
-                lucide.createIcons();
-            }
+            } catch (e) { Swal.fire("Error", e.message, "error"); } 
+            finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`; lucide.createIcons(); }
         }
 
-        // --- 3. DETAIL & MODAL ---
+        // --- MODAL LOGIC ---
         async function openDetailModal(data, isReadOnlyMode) {
-            currentDetailId = data.id || null; // Simpan ID jika edit existing
-
-            // Set Gambar
+            currentDetailId = data.id || null;
             document.getElementById('displayKtp').src = data.foto_url;
             document.getElementById('editFotoUrl').value = data.foto_url;
-            
-            const imgOrang = document.getElementById('displayOrang');
-            imgOrang.src = data.foto_orang_url || "https://via.placeholder.com/150?text=No+Photo";
+            document.getElementById('displayOrang').src = data.foto_orang_url || "https://via.placeholder.com/150?text=No+Photo";
             document.getElementById('editFotoOrangUrl').value = data.foto_orang_url || "";
 
-            // Toggle Overlay Edit Foto Orang
             const overlay = document.getElementById('overlayEditFoto');
-            if (isReadOnlyMode) {
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-            } else {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-            }
+            if (isReadOnlyMode) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); } 
+            else { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
 
-            // Fill Form
             document.getElementById('editNik').value = data.nik || "";
             document.getElementById('editNama').value = data.nama || "";
             document.getElementById('editTempatLahir').value = data.tempat_lahir || "";
@@ -432,30 +403,20 @@
             document.getElementById('editNoHp').value = data.no_hp || "";
             document.getElementById('editJabatan').value = data.jabatan || "Anggota";
 
-            // Kunci Field jika ReadOnly (Detail Mode)
-            const fields = document.querySelectorAll('.input-field');
-            fields.forEach(f => f.readOnly = isReadOnlyMode);
-            
-            // Tombol Simpan
+            document.querySelectorAll('.input-field').forEach(f => f.readOnly = isReadOnlyMode);
             const btnSimpan = document.getElementById('btnSimpan');
             if (isReadOnlyMode) {
                 btnSimpan.classList.add('hidden');
                 document.getElementById('modalTitle').innerText = "Detail Data";
+                await loadDesaOptions(data.kode_kec || ""); 
+                document.getElementById('editKec').value = data.kode_kec || ""; // Jika ada kode_kec di DB join
+                // Note: Jika kode_kec tidak tersimpan di tabel pengurus, perlu logic tambahan. 
+                // Asumsi: Kita bisa set manual atau biarkan user lihat teks saja.
             } else {
                 btnSimpan.classList.remove('hidden');
                 document.getElementById('modalTitle').innerText = "Konfirmasi Data";
-                // Auto Match Kecamatan (Logic sama seperti sebelumnya)
                 autoMatchLocation(data);
             }
-
-            // Handle Lokasi untuk View Mode
-            if(isReadOnlyMode) {
-                // Load opsi tapi set value dan disable
-                await loadDesaOptions(data.kode_kec || ""); // kode_kec harus ada di data list
-                document.getElementById('editKec').value = data.kode_kec || ""; // Perlu logic ekstra untuk ambil kode_kec jika tidak tersedia langsung
-                // Simplified: Just show text if needed, or allow edit dropdown to show selected
-            }
-
             document.getElementById('modalConfirm').classList.remove('hidden');
         }
 
@@ -482,106 +443,82 @@
             } catch(e) {}
         }
 
-        // --- 4. UPDATE FOTO ORANG (DETAIL MODE) ---
         async function uploadNewFotoOrang(input) {
             if (!input.files || !input.files[0]) return;
-            
-            const loading = Swal.fire({title: 'Mengupdate Foto...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            
+            const loading = Swal.fire({title: 'Update Foto...', didOpen: () => Swal.showLoading()});
             try {
                 const fd = new FormData();
                 fd.append('file', input.files[0]);
                 const res = await fetch('/api/upload-simple', { method: 'POST', body: fd });
                 const json = await res.json();
-                
                 if (json.success) {
-                    // Update Database
                     await fetch('/api/update-foto-orang', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ id: currentDetailId, foto_url: json.url })
                     });
-                    
                     document.getElementById('displayOrang').src = json.url;
-                    loadMyData(); // Refresh list background
-                    loading.close();
-                    Swal.fire("Sukses", "Foto berhasil diubah", "success");
+                    loadMyData(); loading.close(); Swal.fire("Sukses", "Foto diubah", "success");
                 }
             } catch (e) { loading.close(); Swal.fire("Gagal", e.message, "error"); }
         }
 
         async function hapusFotoOrang() {
-            if(!confirm("Hapus foto selfie ini?")) return;
-            // Kirim update url kosong
-             await fetch('/api/update-foto-orang', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+            if(!confirm("Hapus foto selfie?")) return;
+            await fetch('/api/update-foto-orang', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ id: currentDetailId, foto_url: "" })
             });
             document.getElementById('displayOrang').src = "https://via.placeholder.com/150?text=No+Photo";
             loadMyData();
         }
 
-        // --- 5. SIMPAN BARU ---
         async function simpanFinal() {
-            // ... (Logic simpan sama seperti sebelumnya, pastikan ambil foto_orang_url) ...
             const payload = {
                 nik: document.getElementById('editNik').value,
                 nama: document.getElementById('editNama').value,
-                // ... fields lain ...
                 kode_desa_lengkap: document.getElementById('editDesa').value,
                 nama_desa: document.getElementById('editDesa').options[document.getElementById('editDesa').selectedIndex]?.text,
                 foto_url: document.getElementById('editFotoUrl').value,
-                foto_orang_url: document.getElementById('editFotoOrangUrl').value, // NEW
+                foto_orang_url: document.getElementById('editFotoOrangUrl').value,
                 no_hp: document.getElementById('editNoHp').value,
                 jabatan: document.getElementById('editJabatan').value,
-                // ... location fields ...
                 tempat_lahir: document.getElementById('editTempatLahir').value,
                 tanggal_lahir: document.getElementById('editTglLahir').value,
                 alamat: document.getElementById('editAlamat').value,
-                rt: "00", rw: "00", // Simplifikasi jika field hidden
-                creator: user.username
+                rt: "00", rw: "00", creator: user.username
             };
-            
-            // Fetch ke /api/simpan-data ...
             try {
                 const res = await fetch('/api/simpan-data', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
                 const result = await res.json();
-                if(result.success) {
-                    closeModal();
-                    Swal.fire("Berhasil", "Data disimpan", "success");
-                    navTo('hasil'); // Pindah ke tab hasil
-                } else throw new Error(result.error);
+                if(result.success) { closeModal(); Swal.fire("Berhasil", "Data disimpan", "success"); navTo('hasil'); } 
+                else throw new Error(result.error);
             } catch(e) { Swal.fire("Gagal", e.message, "error"); }
         }
 
         function closeModal() { document.getElementById('modalConfirm').classList.add('hidden'); }
 
-        // --- 6. LIST DATA & PAGINASI ---
+        // --- LIST & EXPORT LOGIC ---
         async function loadMyData() {
             document.getElementById('listContainer').innerHTML = '<div class="text-center py-10"><span class="animate-spin">🌀</span></div>';
             const res = await fetch(`/api/my-data?user=${user.username}`);
             allData = await res.json();
-            
             document.getElementById('dashTotal').innerText = allData.length;
             renderList();
+            renderTableLaporan();
         }
 
         function renderList() {
             const container = document.getElementById('listContainer');
+            const search = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = allData.filter(i => i.nama.toLowerCase().includes(search));
+            
             container.innerHTML = "";
-            
             const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedData = allData.slice(start, end);
+            const paginated = filtered.slice(start, start + rowsPerPage);
             
-            if (paginatedData.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 py-10">Belum ada data</p>';
-                return;
-            }
+            if (paginated.length === 0) { container.innerHTML = '<p class="text-center text-slate-400 py-10">Data tidak ditemukan</p>'; return; }
 
-            paginatedData.forEach(item => {
-                // Item List
+            paginated.forEach(item => {
                 container.innerHTML += `
                     <div onclick='openDetailFromList(${JSON.stringify(item)})' class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
                         <img src="${item.foto_url}" class="w-12 h-12 rounded-lg object-cover bg-slate-100">
@@ -593,28 +530,56 @@
                             </div>
                         </div>
                         <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
-                    </div>
-                `;
+                    </div>`;
             });
-
-            // Update Pagination UI
-            document.getElementById('pageInfo').innerText = `Hal ${currentPage} dari ${Math.ceil(allData.length / rowsPerPage)}`;
-            document.getElementById('btnPrev').disabled = currentPage === 1;
-            document.getElementById('btnNext').disabled = end >= allData.length;
+            document.getElementById('pageInfo').innerText = `Hal ${currentPage}`;
             document.getElementById('pagination').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        function openDetailFromList(item) {
-            // Perlu trick untuk kirim data lengkap ke modal readonly
-            // Karena API my-data mungkin perlu join kecamatan kode untuk dropdown
-            // Untuk simplifikasi, kita asumsikan item punya semua field atau fetch ulang by ID jika perlu
-            openDetailModal(item, true); // true = ReadOnly
+        function renderTableLaporan() {
+            const body = document.getElementById('tableLaporanBody');
+            body.innerHTML = '';
+            allData.forEach(item => {
+                body.innerHTML += `
+                    <tr>
+                        <td class="p-2">${item.nama}</td>
+                        <td class="p-2 font-mono">${item.nik}</td>
+                        <td class="p-2">${item.jabatan}</td>
+                        <td class="p-2">${item.nama_desa}</td>
+                        <td class="p-2">${item.no_hp}</td>
+                    </tr>`;
+            });
         }
 
-        function nextPage() { if ((currentPage * rowsPerPage) < allData.length) { currentPage++; renderList(); } }
+        function downloadExcel() {
+            if (allData.length === 0) return Swal.fire("Kosong", "Tidak ada data untuk diexport", "info");
+            
+            // Format data untuk Excel agar rapi
+            const dataToExport = allData.map(item => ({
+                "Nama Lengkap": item.nama,
+                "NIK": item.nik,
+                "Jabatan": item.jabatan,
+                "Desa": item.nama_desa,
+                "Kecamatan": item.nama_kecamatan || "-", // Jika join di API my-data ditambah
+                "No HP": item.no_hp,
+                "Tempat Lahir": item.tempat_lahir,
+                "Tanggal Lahir": item.tanggal_lahir,
+                "Alamat": item.alamat,
+                "Foto KTP": item.foto_url,
+                "Foto Selfie": item.foto_orang_url,
+                "Waktu Input": item.created_at
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Data Pengurus");
+            XLSX.writeFile(wb, `Laporan_Pengurus_${user.username}.xlsx`);
+        }
+
+        function openDetailFromList(item) { openDetailModal(item, true); }
+        function nextPage() { currentPage++; renderList(); }
         function prevPage() { if (currentPage > 1) { currentPage--; renderList(); } }
-        
         function logout() { localStorage.clear(); window.location.href='/index.html'; }
     </script>
 </body>
