@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Data - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-slate-50 lg:ml-64">
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
+        <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="/admin/report.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="file-spreadsheet"></i> Report & Data</a>
+            <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="settings"></i> Settings</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl mt-10"><i data-lucide="log-out"></i> Logout</button>
+        </nav>
+    </aside>
+
+    <main class="p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Laporan & Filter</h1>
+            <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 shadow-md">
+                <i data-lucide="download"></i> Export Excel
+            </button>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <select id="selKec" onchange="loadDesa(this.value)" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Semua Kecamatan</option>
+            </select>
+            <select id="selDesa" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Semua Desa</option>
+            </select>
+            <button onclick="filterData()" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Tampilkan Data</button>
+        </div>
+
+        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <table class="w-full text-left" id="tableData">
+                <thead class="bg-slate-50 border-b">
+                    <tr class="text-xs font-bold text-slate-500 uppercase">
+                        <th class="p-4">Nama</th><th class="p-4">NIK</th><th class="p-4">Kecamatan</th><th class="p-4">Desa</th><th class="p-4">Foto</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody" class="divide-y divide-slate-100 text-sm"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        async function loadKec() {
+            const res = await fetch('/api/locations?type=kecamatan');
+            const data = await res.json();
+            const s = document.getElementById('selKec');
+            data.forEach(k => s.innerHTML += `<option value="${k.kode_kec}">${k.nama_kecamatan}</option>`);
+        }
+        async function loadDesa(k) {
+            const res = await fetch(`/api/locations?type=desa&parent=${k}`);
+            const data = await res.json();
+            const s = document.getElementById('selDesa');
+            s.innerHTML = '<option value="">Semua Desa</option>';
+            data.forEach(d => s.innerHTML += `<option value="${d.kode_desa_lengkap}">${d.nama_desa}</option>`);
+        }
+        async function filterData() {
+            const kec = document.getElementById('selKec').value;
+            const desa = document.getElementById('selDesa').value;
+            const res = await fetch(`/api/all-data?kec=${kec}&desa=${desa}`);
+            const data = await res.json();
+            const body = document.getElementById('listBody');
+            body.innerHTML = '';
+            data.forEach(i => {
+                body.innerHTML += `<tr>
+                    <td class="p-4 font-medium">${i.nama}</td><td class="p-4">${i.nik}</td>
+                    <td class="p-4">${i.nama_kecamatan}</td><td class="p-4">${i.nama_desa}</td>
+                    <td class="p-4"><a href="${i.foto_url}" target="_blank" class="text-blue-600">Lihat KTP</a></td>
+                </tr>`;
+            });
+        }
+        function exportExcel() {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tableData")), "Data_Pengurus_Cianjur.xlsx");
+        }
+        loadKec(); filterData();
+        function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+    </script>
+</body>
+</html>
