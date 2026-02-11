@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 lg:ml-64">
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
+        <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="/admin/report.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="file-spreadsheet"></i> Report & Data</a>
+            <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="settings"></i> Settings</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl mt-10"><i data-lucide="log-out"></i> Logout</button>
+        </nav>
+    </aside>
+
+    <main class="p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-800">Ringkasan Statistik</h1>
+            <p class="text-slate-500">Data Umum Kabupaten Cianjur</p>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 font-medium">Total Seluruh Pengurus</p>
+                <p id="totalAll" class="text-4xl font-bold text-blue-600 mt-1">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 font-medium">Desa Aktif</p>
+                <p id="totalDesa" class="text-4xl font-bold text-green-600 mt-1">...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const user = JSON.parse(localStorage.getItem('user'));
+        if(!user || user.role !== 'admin') window.location.href = '/index.html';
+        
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+            document.getElementById('totalAll').innerText = data.total_pengurus;
+            document.getElementById('totalDesa').innerText = data.total_desa + '/360';
+        }
+        loadStats();
+        function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+    </script>
+</body>
+</html>
