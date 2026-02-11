@@ -100,7 +100,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="col-span-2">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">NIK (Wajib 16 Digit)</label>
-                        <input type="number" id="editNik" class="w-full p-3 bg-white border border-slate-200 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="editNik" class="w-full p-3 bg-white border border-slate-200 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="16 Digit NIK">
                     </div>
                     <div class="col-span-2">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap</label>
@@ -119,7 +119,7 @@
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Desa / Kelurahan</label>
                             <select id="editDesa" class="w-full p-3 bg-white border border-slate-300 rounded-xl font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
-                                <option value="">-- Pilih Desa --</option>
+                                <option value="">-- Pilih Kecamatan Dulu --</option>
                             </select>
                         </div>
                     </div>
@@ -163,14 +163,16 @@
         document.getElementById('userName').innerText = user.username;
 
         let base64String = "";
-        let listKecamatan = []; // Cache data kecamatan
+        let listKecamatan = [];
 
-        // --- INIT: Load Data Kecamatan saat halaman dibuka ---
+        // --- INIT: Load Data Kecamatan ---
         async function fetchMasterData() {
             try {
                 const res = await fetch('/api/locations?type=kecamatan');
                 listKecamatan = await res.json();
                 const selKec = document.getElementById('editKec');
+                // Jangan reset total, biarkan opsi default
+                selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
                 listKecamatan.forEach(k => {
                     selKec.innerHTML += `<option value="${k.kode_kec}">${k.nama_kecamatan}</option>`;
                 });
@@ -217,11 +219,11 @@
             formData.append('creator', user.username);
 
             try {
+                // Endpoint ini harus mengembalikan JSON data, BUKAN langsung simpan ke DB
                 const res = await fetch('/api/upload-ktp', { method: 'POST', body: formData });
                 const result = await res.json();
                 
                 if (result.success) {
-                    // Masuk ke modal konfirmasi
                     openModalWithData(result.data, result.foto_url);
                 } else {
                     throw new Error(result.error);
@@ -252,14 +254,14 @@
             let foundKecCode = "";
             const textKecAI = (dataAI.kecamatan || "").toLowerCase().replace("kecamatan", "").trim();
             
-            // Cari nama kecamatan yang mirip di list dropdown
-            const matchKec = listKecamatan.find(k => k.nama_kecamatan.toLowerCase() === textKecAI);
+            // Cari fuzzy match nama kecamatan
+            const matchKec = listKecamatan.find(k => k.nama_kecamatan.toLowerCase().includes(textKecAI));
             
-            if (matchKec) {
+            if (matchKec && textKecAI.length > 2) {
                 foundKecCode = matchKec.kode_kec;
                 document.getElementById('editKec').value = foundKecCode;
                 
-                // Jika kecamatan ketemu, load desa dan coba cari match desanya
+                // Jika kecamatan ketemu, load desa dan cari match desanya
                 await loadDesaOptions(foundKecCode, dataAI.kelurahan);
             } else {
                 // Reset jika tidak ketemu
@@ -269,17 +271,17 @@
                     icon: 'info',
                     title: 'Lokasi Tidak Terbaca Otomatis',
                     text: 'Silakan pilih Kecamatan dan Desa secara manual.',
-                    timer: 3000
+                    timer: 2000
                 });
             }
 
-            // Tampilkan Modal
             document.getElementById('modalConfirm').classList.remove('hidden');
         }
 
         async function loadDesaOptions(kodeKec, autoSelectName = null) {
             const selDesa = document.getElementById('editDesa');
-            selDesa.innerHTML = '<option value="">Loading...</option>';
+            selDesa.innerHTML = '<option value="">Loading Desa...</option>';
+            selDesa.disabled = true;
 
             try {
                 const res = await fetch(`/api/locations?type=desa&parent=${kodeKec}`);
@@ -293,7 +295,8 @@
                     // Auto Match Desa Logic
                     if (autoSelectName) {
                         const cleanNameAI = autoSelectName.toLowerCase().replace(/(desa|kelurahan)/g, "").trim();
-                        if (d.nama_desa.toLowerCase() === cleanNameAI) {
+                        // Cek jika nama desa di database mengandung kata dari AI
+                        if (d.nama_desa.toLowerCase().includes(cleanNameAI) && cleanNameAI.length > 2) {
                             foundDesaCode = d.kode_desa_lengkap;
                         }
                     }
@@ -303,6 +306,8 @@
 
             } catch (e) {
                 selDesa.innerHTML = '<option value="">Gagal load desa</option>';
+            } finally {
+                selDesa.disabled = false;
             }
         }
 
@@ -318,10 +323,15 @@
             // Validasi Input Modal
             const nik = document.getElementById('editNik').value;
             const nama = document.getElementById('editNama').value;
-            const kodeDesa = document.getElementById('editDesa').value; // Ini yang penting!
+            const kodeDesa = document.getElementById('editDesa').value;
 
             if(!nik || !nama || !kodeDesa) {
                 return Swal.fire("Data Belum Lengkap", "Pastikan NIK, Nama, Kecamatan, dan Desa sudah dipilih.", "warning");
+            }
+            
+            // Pastikan dropdown desa tidak dalam loading
+            if (document.getElementById('editDesa').selectedIndex === -1) {
+                return Swal.fire("Error", "Silakan pilih ulang Desa.", "error");
             }
 
             btn.disabled = true;
@@ -336,7 +346,7 @@
                 alamat: document.getElementById('editAlamat').value,
                 rt: document.getElementById('editRt').value,
                 rw: document.getElementById('editRw').value,
-                kode_desa_lengkap: kodeDesa, // FK Database
+                kode_desa_lengkap: kodeDesa, // Kunci Relasi ke Database
                 nama_desa: document.getElementById('editDesa').options[document.getElementById('editDesa').selectedIndex].text,
                 foto_url: document.getElementById('editFotoUrl').value,
                 
@@ -347,6 +357,7 @@
             };
 
             try {
+                // Kirim ke endpoint Simpan (Pastikan file simpan-data.js sudah dibuat)
                 const res = await fetch('/api/simpan-data', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -372,7 +383,7 @@
             }
         }
 
-        // --- TABS & LIST DATA (Logic Lama) ---
+        // --- TABS & LIST DATA ---
         function switchTab(tab) {
             document.getElementById('sec-input').classList.toggle('hidden', tab !== 'input');
             document.getElementById('sec-list').classList.toggle('hidden', tab !== 'list');
