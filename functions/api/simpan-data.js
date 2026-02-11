@@ -25,9 +25,9 @@ export async function onRequestPost(context) {
             INSERT INTO pengurus (
                 nik, nama, tempat_lahir, tanggal_lahir, 
                 alamat, rt, rw, kelurahan, 
-                kode_desa_lengkap, foto_url, no_hp, 
+                kode_desa_lengkap, foto_url, foto_orang_url, no_hp, 
                 jabatan, creator, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
         `;
 
         await db.prepare(query)
@@ -41,7 +41,8 @@ export async function onRequestPost(context) {
                 req.rw, 
                 req.nama_desa, 
                 req.kode_desa_lengkap, 
-                req.foto_url, 
+                req.foto_url,
+                req.foto_orang_url,
                 req.no_hp, 
                 req.jabatan, 
                 req.creator
