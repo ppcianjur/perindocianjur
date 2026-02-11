@@ -2,24 +2,38 @@ import { sha1, extractKTPData } from '../utils.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+    
     try {
+        console.log("--- START DEBUG UPLOAD ---");
+        
+        // 1. Cek Body
         const formData = await request.formData();
         const imageFile = formData.get('foto');
         const base64Data = formData.get('base64');
-        const noHp = formData.get('no_hp');       
-        const jabatan = formData.get('jabatan');   
-        const creator = formData.get('creator');   
+        const creator = formData.get('creator');
 
-        // 1. AMBIL CONFIG CLOUDINARY DARI DB
+        console.log("Input Check:", { 
+            hasFile: !!imageFile, 
+            base64Length: base64Data?.length, 
+            creator 
+        });
+
+        // 2. Ambil Settings dari D1
+        console.log("Fetching settings from D1...");
         const config = await env.DB.prepare("SELECT * FROM settings").all();
+        if (!config.results || config.results.length === 0) {
+            throw new Error("Tabel settings kosong atau tidak ditemukan di D1!");
+        }
         const settings = Object.fromEntries(config.results.map(r => [r.key_name, r.key_value]));
+        console.log("Settings Loaded for Cloudinary:", settings.CLOUDINARY_CLOUD_NAME);
 
-        // 2. SIGNED UPLOAD CLOUDINARY
+        // 3. Cloudinary Upload
         const timestamp = Math.round(new Date().getTime() / 1000).toString();
         const publicId = `ktp_${Date.now()}`;
         const paramsToSign = `format=webp&public_id=${publicId}&timestamp=${timestamp}${settings.CLOUDINARY_API_SECRET}`;
         const signature = await sha1(paramsToSign);
 
+        console.log("Uploading to Cloudinary...");
         const cloudiFormData = new FormData();
         cloudiFormData.append('file', imageFile);
         cloudiFormData.append('api_key', settings.CLOUDINARY_API_KEY);
@@ -32,32 +46,31 @@ export async function onRequestPost(context) {
             method: 'POST', body: cloudiFormData
         });
         const cloudiJson = await cloudiRes.json();
+        
+        if (cloudiJson.error) {
+            console.error("Cloudinary Error:", cloudiJson.error);
+            throw new Error("Cloudinary: " + cloudiJson.error.message);
+        }
+        console.log("Cloudinary Success:", cloudiJson.secure_url);
 
-        // 3. GEMINI OCR (Kirim env.DB ke Utils)
+        // 4. Gemini OCR
+        console.log("Calling Gemini AI...");
         const ktp = await extractKTPData(base64Data, env.DB);
-
-        // 4. PENCARIAN KODE DESA (KONSISTEN: KTP Kelurahan -> DB nama_desa)
-        const desaRow = await env.DB.prepare("SELECT kode_desa_lengkap FROM desa WHERE nama_desa LIKE ? LIMIT 1")
-            .bind(`%${ktp.kelurahan}%`).first();
-
-        // 5. SIMPAN KE DATABASE
-        await env.DB.prepare(`
-            INSERT INTO pengurus (
-                nik, nama, tempat_lahir, tanggal_lahir, no_hp, 
-                jabatan, alamat, rt, rw, kelurahan, 
-                kode_desa_lengkap, foto_url, creator
-            ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-            ktp.nik, ktp.nama, ktp.tempat_lahir, ktp.tanggal_lahir, noHp, 
-            jabatan, ktp.alamat, ktp.rt, ktp.rw, ktp.kelurahan,
-            desaRow?.kode_desa_lengkap || null, cloudiJson.secure_url, creator
-        ).run();
+        console.log("Gemini Success! Extracted Name:", ktp.nama);
 
         return new Response(JSON.stringify({ success: true, data: ktp }), {
             headers: { 'Content-Type': 'application/json' }
         });
+
     } catch (err) {
-        return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500 });
+        console.error("FATAL ERROR:", err.message);
+        return new Response(JSON.stringify({ 
+            success: false, 
+            error: err.message,
+            stack: err.stack 
+        }), { 
+            status: 500, 
+            headers: { 'Content-Type': 'application/json' } 
+        });
     }
 }
