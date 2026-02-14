@@ -119,6 +119,8 @@
             
             <div class="p-6 overflow-y-auto flex-1 space-y-4">
                 <input type="hidden" id="editId">
+                <input type="hidden" id="editAgamaHidden"><input type="hidden" id="editPekerjaanHidden"><input type="hidden" id="editFotoOrangHidden"><input type="hidden" id="editFotoKtaHidden">
+
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-xs font-bold text-slate-500 uppercase">NIK</label><input type="text" id="editNik" class="w-full p-2 border rounded-lg"></div>
                     <div><label class="block text-xs font-bold text-slate-500 uppercase">Nama</label><input type="text" id="editNama" class="w-full p-2 border rounded-lg font-bold"></div>
@@ -143,6 +145,9 @@
                             <option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option>
                             <option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option>
                             <option value="Koordinator">Koordinator Desa</option>
+                            <option value="Ketua DPC">Ketua DPC</option>
+                            <option value="Sekretaris DPC">Sekretaris DPC</option>
+                            <option value="Bendahara DPC">Bendahara DPC</option>
                         </select>
                     </div>
                 </div>
@@ -249,6 +254,8 @@
                 "RT": item.rt || "-",
                 "RW": item.rw || "-",
                 "No HP": item.no_hp,
+                "Agama": item.agama || "-",
+                "Pekerjaan": item.pekerjaan || "-",
                 "Tempat Lahir": item.tempat_lahir,
                 "Tanggal Lahir": item.tanggal_lahir,
                 "Petugas Input": item.creator // Ganti Creator jadi Petugas
@@ -270,6 +277,12 @@
             document.getElementById('editAlamat').value = data.alamat || '';
             document.getElementById('editHp').value = data.no_hp || '';
             document.getElementById('editJabatan').value = data.jabatan;
+            
+            // Simpan Hidden Fields agar tidak hilang saat update
+            document.getElementById('editAgamaHidden').value = data.agama || '';
+            document.getElementById('editPekerjaanHidden').value = data.pekerjaan || '';
+            document.getElementById('editFotoOrangHidden').value = data.foto_orang_url || '';
+            document.getElementById('editFotoKtaHidden').value = data.foto_kta || '';
 
             let kodeKec = "";
             const matchKec = listKecamatan.find(k => k.nama_kecamatan === data.nama_kecamatan);
@@ -306,7 +319,12 @@
                 alamat: document.getElementById('editAlamat').value,
                 tempat_lahir: document.getElementById('editTempat').value,
                 tanggal_lahir: document.getElementById('editTgl').value,
-                kode_desa_lengkap: document.getElementById('editDesaModal').value
+                kode_desa_lengkap: document.getElementById('editDesaModal').value,
+                // Pastikan field lain ikut terkirim
+                agama: document.getElementById('editAgamaHidden').value,
+                pekerjaan: document.getElementById('editPekerjaanHidden').value,
+                foto_orang_url: document.getElementById('editFotoOrangHidden').value,
+                foto_kta: document.getElementById('editFotoKtaHidden').value
             };
 
             const res = await fetch('/api/admin/update-pengurus', {
