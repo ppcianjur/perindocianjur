@@ -6,6 +6,7 @@
     <title>Cetak KTA Perindo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700;800&display=swap');
 
@@ -33,12 +34,11 @@
             print-color-adjust: exact;
         }
 
-        /* --- POSISI DATA --- */
+        /* --- POSISI DATA (TETAP SESUAI PERMINTAAN TERAKHIR) --- */
 
         /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
-            /* Foto ikut naik sedikit menyesuaikan teks */
             top: 24.5mm;      
             left: 4.5mm;    
             width: 15mm;
@@ -52,7 +52,6 @@
         /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            /* PERBAIKAN: Naik 10px (dari 26.5mm ke 24mm) */
             top: 24mm;
             left: 21mm; 
             width: 44mm; 
@@ -83,7 +82,7 @@
             font-size: 5.5pt;
             font-weight: 400;
             color: #222;
-            line-height: 1.2; /* Sedikit dirapatkan spasi barisnya */
+            line-height: 1.2;
         }
 
         @media print {
@@ -107,9 +106,12 @@
 </head>
 <body>
 
-    <div class="no-print mb-6 flex gap-3">
-        <button onclick="window.print()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 flex items-center gap-2 shadow-lg">
-            <i data-lucide="printer" class="w-5 h-5"></i> Cetak Kartu
+    <div class="no-print mb-6 flex gap-3 flex-wrap justify-center">
+        <button onclick="downloadImage()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95">
+            <i data-lucide="download" class="w-5 h-5"></i> Download PNG
+        </button>
+        <button onclick="window.print()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95">
+            <i data-lucide="printer" class="w-5 h-5"></i> Cetak / PDF
         </button>
         <button onclick="window.close()" class="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-300">
             Tutup
@@ -157,16 +159,12 @@
                 const tgl = data.tanggal_lahir || "";
                 document.getElementById('txtTtl').innerText = `${data.tempat_lahir || 'CIANJUR'} / ${tgl}`;
 
-                // PERBAIKAN FORMAT ALAMAT
-                // 1. Susun string baris pertama
+                // FORMAT ALAMAT
                 let baris1 = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, KABUPATEN CIANJUR`.toUpperCase();
                 
-                // Potong jika terlalu panjang (agar tidak menabrak batas kanan)
                 if(baris1.length > 85) baris1 = baris1.substring(0, 82) + "...";
 
-                // 2. Masukkan ke HTML dengan <br> untuk Jawa Barat
                 document.getElementById('txtAlamat').innerHTML = `${baris1}<br>JAWA BARAT`;
-                
                 document.getElementById('txtHp').innerText = `Telp : ${data.no_hp_format || '-'}`;
 
                 if (data.foto_orang_url) {
@@ -178,6 +176,31 @@
             } catch (e) {
                 alert("Gagal memuat data: " + e.message);
             }
+        }
+
+        // FUNGSI DOWNLOAD PNG
+        function downloadImage() {
+            const card = document.getElementById('card');
+            const namaFile = document.getElementById('txtNama').innerText || 'KTA_PERINDO';
+            
+            // Tampilkan loading cursor
+            document.body.style.cursor = 'wait';
+
+            html2canvas(card, {
+                scale: 3, // Kualitas tinggi (HD)
+                useCORS: true, // Wajib agar foto profil dari URL luar (Cloudinary) ikut ter-render
+                allowTaint: true,
+                backgroundColor: null // Transparan background jika ada
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `KTA_${namaFile.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                document.body.style.cursor = 'default';
+            }).catch(err => {
+                alert("Gagal membuat gambar: " + err);
+                document.body.style.cursor = 'default';
+            });
         }
 
         loadData();
