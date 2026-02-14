@@ -39,7 +39,7 @@
 
         /* --- POSISI DATA --- */
 
-        /* 1. Foto Anggota (TURUN 5px -> Jadi 23mm) */
+        /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
             top: 23mm;      
@@ -50,11 +50,14 @@
             border-radius: 2px;
             z-index: 10;
             background-color: #ddd;
+            
+            /* RESET FRAME */
             border: none !important; 
             outline: none !important;
+            box-shadow: none !important;
         }
 
-        /* 2. Area Teks Data (Tetap di 21mm sesuai request sebelumnya) */
+        /* 2. Area Teks Data */
         .text-area {
             position: absolute;
             top: 21mm; 
@@ -64,19 +67,24 @@
             box-sizing: border-box; 
             line-height: 1.15;
             z-index: 10;
+            
+            /* RESET FRAME */
             border: none !important;
             outline: none !important;
             background: transparent !important;
         }
 
         .text-area * {
-            border: none !important; outline: none !important; background: transparent !important;
+            border: none !important; 
+            outline: none !important; 
+            box-shadow: none !important;
+            background: transparent !important;
         }
 
-        /* 3. QR CODE AREA (TURUN 5px -> Jadi 23mm) */
+        /* 3. QR CODE AREA (RESET FRAME DITAMBAHKAN DISINI) */
         .qr-area {
             position: absolute;
-            top: 23.8mm;  
+            top: 23mm;  
             right: 5mm;   
             width: 15.5mm;
             height: 15.5mm;
@@ -85,8 +93,21 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1px; 
+            padding: 1px;
+            
+            /* HARD RESET AGAR TIDAK ADA KOTAK ABU */
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
+        
+        /* Reset juga elemen gambar di dalam QR */
+        .qr-area * {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
         .qr-area img {
             width: 100%;
             height: auto;
