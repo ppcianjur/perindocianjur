@@ -178,28 +178,45 @@
             }
         }
 
-        // FUNGSI DOWNLOAD PNG
+        // FUNGSI DOWNLOAD PNG (DIPERBAIKI)
         function downloadImage() {
             const card = document.getElementById('card');
             const namaFile = document.getElementById('txtNama').innerText || 'KTA_PERINDO';
             
-            // Tampilkan loading cursor
             document.body.style.cursor = 'wait';
 
-            html2canvas(card, {
-                scale: 3, // Kualitas tinggi (HD)
-                useCORS: true, // Wajib agar foto profil dari URL luar (Cloudinary) ikut ter-render
-                allowTaint: true,
-                backgroundColor: null // Transparan background jika ada
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `KTA_${namaFile.replace(/\s+/g, '_')}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                document.body.style.cursor = 'default';
-            }).catch(err => {
-                alert("Gagal membuat gambar: " + err);
-                document.body.style.cursor = 'default';
+            // Pastikan font sudah terload sebelum screenshot
+            document.fonts.ready.then(() => {
+                html2canvas(card, {
+                    scale: 5, // TINGKAT KETAJAMAN: 5x Resolusi Layar (Super HD)
+                    useCORS: true,
+                    backgroundColor: null,
+                    
+                    // TRIK: Memperbaiki CSS hanya saat proses cloning gambar
+                    onclone: (clonedDoc) => {
+                        const clonedNama = clonedDoc.getElementById('txtNama');
+                        const clonedKta = clonedDoc.getElementById('txtKta');
+                        
+                        // 1. Paksa teks Nama agar tidak turun baris/terpotong
+                        clonedNama.style.whiteSpace = 'nowrap';
+                        clonedNama.style.overflow = 'visible'; // Biarkan melebar jika perlu
+                        clonedNama.style.width = 'auto';       // Reset lebar paksa
+                        clonedNama.style.letterSpacing = 'normal'; // Reset spacing biar aman
+                        
+                        // 2. Sesuaikan Font Smoothing agar lebih tebal di gambar
+                        clonedNama.style.webkitFontSmoothing = 'none'; 
+                        clonedKta.style.webkitFontSmoothing = 'none';
+                    }
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `KTA_${namaFile.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0); // Kualitas Maksimum
+                    link.click();
+                    document.body.style.cursor = 'default';
+                }).catch(err => {
+                    alert("Gagal membuat gambar: " + err);
+                    document.body.style.cursor = 'default';
+                });
             });
         }
 
