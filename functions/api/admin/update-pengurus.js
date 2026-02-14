@@ -3,8 +3,7 @@ export async function onRequestPost(context) {
         const req = await context.request.json();
         const db = context.env.DB;
 
-        // PERBAIKAN: Menambahkan update jenis_kelamin, agama, pekerjaan, foto_kta
-        // PERBAIKAN UTAMA: Menambahkan foto_orang_url agar bisa diupdate (bukan hanya dihapus)
+        // Pastikan urutan binding parameter (?) SAMA PERSIS dengan urutan variabel di .bind()
         const query = `
             UPDATE pengurus SET 
                 nik = ?, nama = ?, jenis_kelamin = ?, no_hp = ?, jabatan = ?, 
@@ -16,15 +15,26 @@ export async function onRequestPost(context) {
 
         await db.prepare(query)
             .bind(
-                req.nik, req.nama, req.jenis_kelamin, req.no_hp, req.jabatan,
-                req.alamat, req.tempat_lahir, req.tanggal_lahir,
-                req.agama, req.pekerjaan, req.foto_orang_url, req.foto_kta,
-                req.kode_desa_lengkap, req.id
+                req.nik, 
+                req.nama, 
+                req.jenis_kelamin, 
+                req.no_hp, 
+                req.jabatan,
+                req.alamat, 
+                req.tempat_lahir, 
+                req.tanggal_lahir,
+                req.agama,          // Kolom Baru
+                req.pekerjaan,      // Kolom Baru
+                req.foto_orang_url, // Kolom Update
+                req.foto_kta,       // Kolom Baru
+                req.kode_desa_lengkap, 
+                req.id              // WHERE id
             )
             .run();
 
         return new Response(JSON.stringify({ success: true }));
     } catch (e) {
+        // Ini akan menampilkan pesan error detail di Network Tab (Developer Tools) browser
         return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
     }
 }
