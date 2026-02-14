@@ -6,12 +6,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-50 lg:ml-64">
+<body class="bg-slate-50 lg:ml-64 pb-24">
     <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
         <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
         <nav class="mt-4 px-4 space-y-2">
             <a href="/admin/dashboard.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-            <a href="/admin/kelengkapan.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 text-white shadow-lg"><i data-lucide="list-checks"></i> Cek Kelengkapan</a>
+            <a href="/admin/kelengkapan.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="list-checks"></i> Cek Kelengkapan</a>
             <a href="/admin/pengurus.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="users"></i> Data Pengurus</a>
             <a href="/admin/users.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="user-cog"></i> Manajemen User</a>
             <a href="/admin/settings.html" class="flex items-center gap-3 p-3 rounded-xl text-slate-600 hover:bg-blue-50"><i data-lucide="settings"></i> Settings</a>
@@ -26,28 +26,24 @@
         </header>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="users" class="w-12 h-12 text-blue-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Total Pengurus</p>
                 <p id="totalAll" class="text-3xl font-extrabold text-blue-600 mt-2">...</p>
                 <p class="text-[10px] text-slate-400 mt-1">Data masuk sistem</p>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="user-cog" class="w-12 h-12 text-orange-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Total Petugas</p>
                 <p id="totalUsers" class="text-3xl font-extrabold text-orange-600 mt-2">...</p>
                 <p class="text-[10px] text-slate-400 mt-1">Petugas lapangan aktif</p>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="map-pin" class="w-12 h-12 text-purple-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Cakupan Kec.</p>
                 <p id="totalKec" class="text-3xl font-extrabold text-purple-600 mt-2">...</p>
                 <p class="text-[10px] text-slate-400 mt-1">Dari total 32 Kecamatan</p>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="map" class="w-12 h-12 text-green-600"></i></div>
                 <p class="text-slate-500 font-bold text-xs uppercase tracking-wider">Cakupan Desa</p>
@@ -56,6 +52,31 @@
             </div>
         </div>
     </main>
+
+    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 pb-safe pt-3 px-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40 flex justify-between items-end lg:hidden">
+        <a href="/admin/dashboard.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-blue-600 transition-colors">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="/admin/kelengkapan.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <i data-lucide="list-checks" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Cek</span>
+        </a>
+        <a href="/admin/pengurus.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <div class="bg-slate-100 p-2 rounded-full -mt-6 border-4 border-white shadow-sm">
+                <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[10px] font-medium mt-1">Data</span>
+        </a>
+        <a href="/admin/users.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <i data-lucide="user-cog" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Admin</span>
+        </a>
+        <button onclick="logout()" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-red-400 hover:text-red-600 transition-colors">
+            <i data-lucide="log-out" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Keluar</span>
+        </button>
+    </nav>
 
     <script>
         lucide.createIcons();
@@ -66,19 +87,14 @@
             try {
                 const res = await fetch('/api/stats');
                 const data = await res.json();
-                
-                // Update UI dengan Data Baru
                 document.getElementById('totalAll').innerText = data.total_pengurus || '0';
                 document.getElementById('totalUsers').innerText = data.total_users || '0';
                 document.getElementById('totalKec').innerText = (data.total_kec || '0');
                 document.getElementById('totalDesa').innerText = (data.total_desa || '0');
-            } catch (e) {
-                console.error("Gagal memuat statistik", e);
-            }
+            } catch (e) { console.error("Gagal memuat statistik", e); }
         }
         
         function logout() { localStorage.clear(); window.location.href = '/index.html'; }
-        
         loadStats();
     </script>
 </body>
