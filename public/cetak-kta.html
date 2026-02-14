@@ -6,7 +6,9 @@
     <title>Cetak KTA Perindo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.3.0/dom-to-image-more.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700;800&display=swap');
 
@@ -30,11 +32,13 @@
             overflow: hidden;
             color: #000;
             background-color: white;
+            /* Rendering Image yang lebih tajam */
+            image-rendering: -webkit-optimize-contrast;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* --- POSISI DATA (TETAP SESUAI PERMINTAAN TERAKHIR) --- */
+        /* --- POSISI DATA (Kembali ke Posisi Normal/PDF karena library ini akurat) --- */
 
         /* 1. Foto Anggota */
         .photo-area {
@@ -52,7 +56,8 @@
         /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            top: 24mm;
+            /* Posisi dikembalikan ke 24mm (Standar PDF) karena library ini tidak menurunkan teks */
+            top: 24mm; 
             left: 21mm; 
             width: 44mm; 
             padding-left: 2.5mm; 
@@ -108,7 +113,7 @@
 
     <div class="no-print mb-6 flex gap-3 flex-wrap justify-center">
         <button onclick="downloadImage()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95">
-            <i data-lucide="download" class="w-5 h-5"></i> Download PNG
+            <i data-lucide="download" class="w-5 h-5"></i> Download PNG (HD)
         </button>
         <button onclick="window.print()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95">
             <i data-lucide="printer" class="w-5 h-5"></i> Cetak / PDF
@@ -159,9 +164,7 @@
                 const tgl = data.tanggal_lahir || "";
                 document.getElementById('txtTtl').innerText = `${data.tempat_lahir || 'CIANJUR'} / ${tgl}`;
 
-                // FORMAT ALAMAT
                 let baris1 = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, KABUPATEN CIANJUR`.toUpperCase();
-                
                 if(baris1.length > 85) baris1 = baris1.substring(0, 82) + "...";
 
                 document.getElementById('txtAlamat').innerHTML = `${baris1}<br>JAWA BARAT`;
@@ -178,45 +181,37 @@
             }
         }
 
-        // FUNGSI DOWNLOAD PNG (DIPERBAIKI)
+        // FUNGSI DOWNLOAD PNG BARU (DOM-TO-IMAGE-MORE)
         function downloadImage() {
             const card = document.getElementById('card');
             const namaFile = document.getElementById('txtNama').innerText || 'KTA_PERINDO';
             
             document.body.style.cursor = 'wait';
 
-            // Pastikan font sudah terload sebelum screenshot
-            document.fonts.ready.then(() => {
-                html2canvas(card, {
-                    scale: 5, // TINGKAT KETAJAMAN: 5x Resolusi Layar (Super HD)
-                    useCORS: true,
-                    backgroundColor: null,
-                    
-                    // TRIK: Memperbaiki CSS hanya saat proses cloning gambar
-                    onclone: (clonedDoc) => {
-                        const clonedNama = clonedDoc.getElementById('txtNama');
-                        const clonedKta = clonedDoc.getElementById('txtKta');
-                        
-                        // 1. Paksa teks Nama agar tidak turun baris/terpotong
-                        clonedNama.style.whiteSpace = 'nowrap';
-                        clonedNama.style.overflow = 'visible'; // Biarkan melebar jika perlu
-                        clonedNama.style.width = 'auto';       // Reset lebar paksa
-                        clonedNama.style.letterSpacing = 'normal'; // Reset spacing biar aman
-                        
-                        // 2. Sesuaikan Font Smoothing agar lebih tebal di gambar
-                        clonedNama.style.webkitFontSmoothing = 'none'; 
-                        clonedKta.style.webkitFontSmoothing = 'none';
-                    }
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `KTA_${namaFile.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-                    link.href = canvas.toDataURL('image/png', 1.0); // Kualitas Maksimum
-                    link.click();
-                    document.body.style.cursor = 'default';
-                }).catch(err => {
-                    alert("Gagal membuat gambar: " + err);
-                    document.body.style.cursor = 'default';
-                });
+            // Skala Resolusi (4x agar tajam setara retina display)
+            const scale = 4;
+
+            domtoimage.toPng(card, {
+                width: card.clientWidth * scale,
+                height: card.clientHeight * scale,
+                style: {
+                    transform: `scale(${scale})`,
+                    transformOrigin: 'top left',
+                    width: `${card.clientWidth}px`,
+                    height: `${card.clientHeight}px`
+                }
+            })
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+                link.download = `KTA_${namaFile.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                link.href = dataUrl;
+                link.click();
+                document.body.style.cursor = 'default';
+            })
+            .catch(function (error) {
+                console.error('oops, something went wrong!', error);
+                alert("Gagal render gambar: " + error);
+                document.body.style.cursor = 'default';
             });
         }
 
