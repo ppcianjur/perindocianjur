@@ -2,52 +2,136 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Pengurus - Curriculum Vitae</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Portal Pengurus - Dokumen Lengkap</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* CSS Tampilan Layar */
-        .btn-action { @apply p-1 rounded hover:bg-slate-100 transition-colors; }
-        input.editable { @apply w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none; }
+        /* --- 1. SETUP UMUM & MOBILE FIRST --- */
+        body { background-color: #f1f5f9; font-family: sans-serif; }
         
-        /* CSS KHUSUS CETAK (Agar mirip format Word/Gambar yang diminta) */
+        /* Input Field agar enak di HP */
+        input.editable { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            background-color: #f8fafc;
+            font-size: 16px; /* Mencegah zoom otomatis di iPhone */
+            color: #334155;
+            transition: all 0.2s;
+        }
+        input.editable:focus {
+            border-color: #2563eb;
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Container Kertas di Layar (Responsive) */
+        .a4-page {
+            background: white;
+            margin: 20px auto;
+            padding: 20mm;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            
+            /* Responsive Logic */
+            width: 100%; 
+            max-width: 210mm; /* Mentok di ukuran A4 kalau di laptop */
+            min-height: 297mm; /* Tinggi minimal A4 */
+            
+            /* Font Dokumen */
+            font-family: "Times New Roman", Times, serif;
+            color: black;
+            box-sizing: border-box;
+        }
+
+        /* Penyesuaian Khusus Layar HP Kecil */
+        @media screen and (max-width: 640px) {
+            .a4-page {
+                padding: 15px; /* Margin diperkecil di HP biar muat banyak */
+                min-height: auto; /* Tinggi bebas di HP */
+                margin: 10px auto;
+                width: 95%; /* Ada sela dikit di pinggir */
+            }
+            .bio-label { width: 100px !important; } /* Label diperpendek di HP */
+            .doc-h1 { font-size: 12pt !important; }
+            
+            /* Tabel bisa discroll menyamping di HP agar tidak hancur */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 10px;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+            }
+        }
+
+        /* --- 2. SETUP KHUSUS CETAK (PASTI A4) --- */
         @media print {
             @page { size: A4; margin: 15mm; }
-            body { background: white; font-family: "Times New Roman", Times, serif; color: black; -webkit-print-color-adjust: exact; }
+            body { background: white; -webkit-print-color-adjust: exact; }
             
-            /* Sembunyikan elemen UI Aplikasi saat print */
-            #loginSection, #toolbar, .no-print, button, .btn-add-row, .action-col { display: none !important; }
+            /* Sembunyikan Elemen UI */
+            #loginSection, #toolbar, .no-print, button, nav { display: none !important; }
             
-            /* Tampilkan Section Utama */
-            #cvSection { display: block !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; }
+            /* Reset Container ke Ukuran Pasti A4 */
+            #mainApp { display: block !important; padding: 0 !important; }
+            .a4-page {
+                width: 100% !important; 
+                max-width: none !important;
+                margin: 0 !important; 
+                padding: 0 !important; 
+                box-shadow: none !important; 
+                border: none !important;
+                page-break-after: always; /* Wajib ganti halaman */
+            }
+            .a4-page:last-child { page-break-after: auto; }
             
-            /* Styling Judul */
-            h1.cv-title { text-align: center; font-weight: bold; text-decoration: underline; font-size: 16pt; margin-bottom: 20px; text-transform: uppercase; }
+            /* Reset Input Menjadi Teks Biasa (Tanpa Kotak) */
+            input, textarea, input.editable { 
+                border: none !important; 
+                background: transparent !important; 
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: inherit !important;
+                width: 100% !important;
+                color: black !important;
+            }
             
-            /* Styling Sub-Judul */
-            h3.section-title { font-weight: bold; font-size: 12pt; margin-top: 15px; margin-bottom: 5px; text-decoration: underline; text-transform: uppercase; }
+            /* Hapus Scrollbar Tabel saat Print */
+            .table-responsive { border: none; overflow: visible; }
             
-            /* Styling Tabel Biodata */
-            .bio-table { width: 100%; font-size: 12pt; line-height: 1.5; margin-bottom: 15px; }
-            .bio-table td { vertical-align: top; }
-            .bio-label { width: 180px; }
-            .bio-sep { width: 10px; }
-
-            /* Styling Tabel Riwayat */
-            .data-table { width: 100%; border-collapse: collapse; font-size: 11pt; margin-bottom: 15px; }
-            .data-table th, .data-table td { border: 1px solid black; padding: 5px; vertical-align: middle; }
-            .data-table th { text-align: center; font-weight: bold; background-color: transparent !important; }
-            .data-table input { border: none !important; background: transparent !important; width: 100%; font-family: inherit; font-size: inherit; padding: 0; margin: 0; }
-            
-            /* Signature Area */
-            .signature { margin-top: 50px; text-align: right; width: 100%; }
-            .signature div { display: inline-block; text-align: center; width: 200px; }
-            
-            /* Reset Inputs untuk Print */
-            input { border: none; background: transparent; width: 100%; }
+            /* CV Compact agar muat */
+            .cv-compact { font-size: 10pt; }
+            .cv-compact th, .cv-compact td { padding: 2px 4px !important; }
         }
+
+        /* --- 3. STYLING DOKUMEN --- */
+        .doc-header { display: flex; align-items: flex-start; margin-bottom: 20px; }
+        .doc-logo { width: 80px; height: auto; margin-right: 15px; }
+        .doc-title { text-align: center; flex-grow: 1; padding-top: 10px; }
+        .doc-h2 { font-size: 12pt; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; text-decoration: underline; }
+        
+        .bio-table { width: 100%; font-size: 12pt; line-height: 1.4; margin-bottom: 15px; }
+        .bio-table td { vertical-align: top; padding-bottom: 4px; }
+        .bio-label { width: 140px; white-space: nowrap; }
+        .bio-sep { width: 10px; text-align: center; }
+        
+        .content-text { font-size: 12pt; text-align: justify; line-height: 1.5; margin-bottom: 15px; }
+        .indent-text { text-indent: 40px; }
+        
+        .signature-section { margin-top: 30px; display: flex; flex-direction: column; align-items: flex-end; }
+        .sig-box { text-align: center; width: 220px; }
+        .sig-space { height: 70px; }
+        
+        /* CV Styling */
+        .cv-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt; min-width: 600px; /* Agar di HP bisa discroll */ }
+        .cv-table th, .cv-table td { border: 1px solid black; padding: 4px; vertical-align: middle; }
+        .cv-table th { text-align: center; font-weight: bold; background-color: #f8fafc; }
+        @media print { .cv-table th { background-color: transparent !important; } }
+        .cv-section-title { font-size: 11pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -56,7 +140,7 @@
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center border border-slate-200">
             <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="w-20 h-auto mx-auto mb-4">
             <h1 class="text-2xl font-bold text-slate-800">Portal Data Pengurus</h1>
-            <p class="text-slate-500 mb-6 text-sm">Silakan masukkan NIK Anda untuk mengakses data.</p>
+            <p class="text-slate-500 mb-6 text-sm">Masukkan NIK untuk mengedit & mencetak dokumen.</p>
             
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <input type="text" id="inputNik" placeholder="Nomor Induk Kependudukan (NIK)" class="w-full p-4 rounded-xl border border-slate-300 text-center font-bold text-lg tracking-widest outline-none focus:ring-2 focus:ring-blue-600 shadow-sm" required inputmode="numeric">
@@ -67,106 +151,191 @@
 
     <div id="mainApp" class="hidden pb-20">
         
-        <nav id="toolbar" class="bg-white border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
-            <div class="flex items-center gap-3">
-                <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="w-8 h-8">
-                <div>
-                    <h2 class="font-bold text-slate-800 leading-tight" id="navName">Nama Pengurus</h2>
-                    <p class="text-[10px] text-slate-500 font-mono" id="navNik">NIK: ...</p>
+        <nav id="toolbar" class="bg-white border-b sticky top-0 z-40 px-4 py-3 shadow-sm no-print">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 max-w-5xl mx-auto">
+                <div class="flex items-center gap-3">
+                    <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="w-8 h-8">
+                    <div>
+                        <h2 class="font-bold text-slate-800 leading-tight text-sm md:text-base" id="navName">Pengurus</h2>
+                        <p class="text-[10px] text-slate-500 font-mono" id="navNik">NIK: ...</p>
+                    </div>
                 </div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="saveData()" class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700 shadow"><i data-lucide="save" class="w-4 h-4"></i> Simpan</button>
-                <button onclick="window.print()" class="flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 shadow"><i data-lucide="printer" class="w-4 h-4"></i> Cetak</button>
-                <button onclick="logout()" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="saveData()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-green-600 text-white px-3 py-2 rounded-lg font-bold text-xs hover:bg-green-700 shadow active:scale-95"><i data-lucide="save" class="w-4 h-4"></i> Simpan</button>
+                    <button onclick="window.print()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-700 text-white px-3 py-2 rounded-lg font-bold text-xs hover:bg-slate-800 shadow active:scale-95"><i data-lucide="printer" class="w-4 h-4"></i> Cetak</button>
+                    <button onclick="logout()" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                </div>
             </div>
         </nav>
 
-        <div class="max-w-[210mm] mx-auto mt-8 bg-white shadow-2xl min-h-[297mm] p-[15mm] md:p-[20mm]" id="cvSection">
-            
-            <h1 class="cv-title text-center font-bold text-2xl underline mb-8 uppercase font-serif">CURRICULUM VITAE</h1>
-
-            <h3 class="section-title font-serif font-bold text-lg underline uppercase mb-2">DATA PRIBADI :</h3>
-            <table class="bio-table font-serif mb-6 w-full">
-                <tr><td class="bio-label font-bold">Nama</td><td class="bio-sep">:</td><td id="cvNama"></td></tr>
-                <tr><td class="bio-label font-bold">Tempat/Tgl.Lahir</td><td class="bio-sep">:</td><td id="cvTtl"></td></tr>
-                <tr><td class="bio-label font-bold">Jenis Kelamin</td><td class="bio-sep">:</td><td id="cvJk"></td></tr>
-                <tr><td class="bio-label font-bold">Agama</td><td class="bio-sep">:</td><td id="cvAgama"></td></tr>
-                <tr><td class="bio-label font-bold">Pekerjaan</td><td class="bio-sep">:</td><td id="cvPekerjaan"></td></tr>
-                <tr><td class="bio-label font-bold">Alamat</td><td class="bio-sep">:</td><td id="cvAlamat"></td></tr>
-                <tr><td class="bio-label font-bold"></td><td class="bio-sep"></td><td id="cvDesaKec"></td></tr>
-                <tr><td class="bio-label font-bold">Nomer Telepon</td><td class="bio-sep">:</td><td id="cvHp"></td></tr>
-            </table>
-
-            <div class="flex justify-between items-end mb-1">
-                <h3 class="section-title font-serif font-bold text-lg underline uppercase">DATA PENDIDIKAN :</h3>
-                <button onclick="addRow('pendidikan')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
-            </div>
-            <table class="data-table w-full mb-6 border-collapse border border-black font-serif">
-                <thead>
-                    <tr>
-                        <th class="border border-black p-1 w-10 text-center">NO</th>
-                        <th class="border border-black p-1">Nama Sekolah/Fakultas/Perguruan Tinggi</th>
-                        <th class="border border-black p-1 w-24 text-center">Tahun</th>
-                        <th class="border border-black p-1 w-24 text-center">Tahun Lulus</th>
-                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyPendidikan"></tbody>
-            </table>
-
-            <div class="flex justify-between items-end mb-1">
-                <h3 class="section-title font-serif font-bold text-lg underline uppercase">PENGALAMAN ORGANISASI :</h3>
-                <button onclick="addRow('organisasi')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
-            </div>
-            <table class="data-table w-full mb-6 border-collapse border border-black font-serif">
-                <thead>
-                    <tr>
-                        <th class="border border-black p-1 w-10 text-center">NO</th>
-                        <th class="border border-black p-1">Nama Organisasi</th>
-                        <th class="border border-black p-1 w-48 text-center">Tahun S/d Tahun</th>
-                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyOrganisasi"></tbody>
-            </table>
-
-            <div class="flex justify-between items-end mb-1">
-                <h3 class="section-title font-serif font-bold text-lg underline uppercase">PENGALAMAN KERJA :</h3>
-                <button onclick="addRow('pekerjaan')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
-            </div>
-            <table class="data-table w-full mb-10 border-collapse border border-black font-serif">
-                <thead>
-                    <tr>
-                        <th class="border border-black p-1 w-10 text-center">NO</th>
-                        <th class="border border-black p-1">Bidang Pekerjaan</th>
-                        <th class="border border-black p-1 w-48 text-center">Tahun S/d Tahun</th>
-                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyPekerjaan"></tbody>
-            </table>
-
-            <div class="signature font-serif">
-                <div>
-                    <p class="mb-20">Hormat Kami</p>
-                    <p class="font-bold border-b border-black inline-block pb-1 min-w-[150px]" id="ttdNama">(Nama Lengkap)</p>
+        <div class="a4-page">
+            <div class="doc-header">
+                <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="doc-logo">
+                <div class="doc-title pt-6">
+                    <h2 class="doc-h2">SURAT KESEDIAAN MENJADI ANGGOTA</h2>
                 </div>
             </div>
 
-        </div>
-        
-        <div class="text-center text-slate-400 text-xs mt-8 mb-4 no-print">
-            &copy; 2026 Portal Pengurus - DPD Perindo Cianjur
+            <p class="content-text">Yang bertanda tangan dibawah ini :</p>
+
+            <table class="bio-table">
+                <tr><td class="bio-label">Nama</td><td class="bio-sep">:</td><td class="fill-nama"></td></tr>
+                <tr><td class="bio-label">TTL</td><td class="bio-sep">:</td><td class="fill-ttl"></td></tr>
+                <tr><td class="bio-label">Pekerjaan</td><td class="bio-sep">:</td><td class="fill-pekerjaan"></td></tr>
+                <tr><td class="bio-label">No Kontak</td><td class="bio-sep">:</td><td class="fill-hp"></td></tr>
+                <tr><td class="bio-label">Alamat</td><td class="bio-sep">:</td><td class="fill-alamat"></td></tr>
+                <tr><td class="bio-label"></td><td class="bio-sep"></td><td class="fill-desa-kec"></td></tr>
+            </table>
+
+            <p class="content-text indent-text">
+                Dengan ini bahwa saya bersedia menjadi anggota PARTAI PERINDO (Persatuan Indonesia) jika dikemudian hari ditemukan menyalahi ketentuan partai, maka saya menerima segala bentuk konsekwensinya.
+            </p>
+            <p class="content-text indent-text">
+                Demikian surat pernyataan ini saya buat dengan sebenar benarnya dan sadar tanpa tekanan dari pihak manapun.
+            </p>
+
+            <div class="signature-section">
+                <div class="sig-box">
+                    <p>Dibuat di Cianjur</p>
+                    <p>Pada Tanggal <span class="current-date"></span></p>
+                    <p class="mt-2">Yang menyatakan</p>
+                    <div class="sig-space"></div>
+                    <p class="font-bold border-b border-black inline-block min-w-[150px] fill-nama-upper"></p>
+                </div>
+            </div>
         </div>
 
+        <div class="a4-page">
+            <div class="doc-header">
+                <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="doc-logo">
+                <div class="doc-title pt-6">
+                    <h2 class="doc-h2">SURAT PERNYATAAN</h2>
+                </div>
+            </div>
+
+            <p class="content-text">Saya yang bertanda tangan di bawah ini :</p>
+
+            <table class="bio-table">
+                <tr><td class="bio-label">Nama</td><td class="bio-sep">:</td><td class="fill-nama"></td></tr>
+                <tr><td class="bio-label">TTL</td><td class="bio-sep">:</td><td class="fill-ttl"></td></tr>
+                <tr><td class="bio-label">Pekerjaan</td><td class="bio-sep">:</td><td class="fill-pekerjaan"></td></tr>
+                <tr><td class="bio-label">No Kontak</td><td class="bio-sep">:</td><td class="fill-hp"></td></tr>
+                <tr><td class="bio-label">Alamat</td><td class="bio-sep">:</td><td class="fill-alamat"></td></tr>
+                <tr><td class="bio-label"></td><td class="bio-sep"></td><td class="fill-desa-kec"></td></tr>
+            </table>
+
+            <p class="content-text indent-text">
+                Dengan ini saya menyatakan bahwa Saya bersedia menjadi Pengurus Dewan Pimpinan Cabang Partai PERINDO Kota/Kabupaten Cianjur Periode 2025-2030.
+            </p>
+            <p class="content-text indent-text">
+                Demikian surat kesediaan ini saya buat dengan sebenar benarnya, Atas perhatiannya diucapkan terimakasih.
+            </p>
+
+            <div class="signature-section">
+                <div class="sig-box">
+                    <p>Cianjur, <span class="current-date"></span></p>
+                    <p class="mt-2">Hormat Saya</p>
+                    <div class="sig-space"></div>
+                    <p class="font-bold border-b border-black inline-block min-w-[150px] fill-nama-upper"></p>
+                </div>
+            </div>
+
+            <div class="mt-20 font-serif text-[10pt]">
+                <p class="font-bold underline mb-1">Harap Melampirkan :</p>
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Fotocopy KTP</li>
+                    <li>Fotocopy KTA</li>
+                    <li>Curriculum Vitae</li>
+                    <li>Pas Foto 4x6</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="a4-page cv-compact">
+            <h1 class="text-center font-bold text-lg underline mb-6 uppercase">CURRICULUM VITAE</h1>
+
+            <h3 class="cv-section-title">DATA PRIBADI :</h3>
+            <table class="bio-table" style="font-size: 11pt; margin-bottom: 10px;">
+                <tr><td class="bio-label">Nama</td><td class="bio-sep">:</td><td class="fill-nama"></td></tr>
+                <tr><td class="bio-label">Tempat/Tgl.Lahir</td><td class="bio-sep">:</td><td class="fill-ttl"></td></tr>
+                <tr><td class="bio-label">Jenis Kelamin</td><td class="bio-sep">:</td><td class="fill-jk"></td></tr>
+                <tr><td class="bio-label">Agama</td><td class="bio-sep">:</td><td class="fill-agama"></td></tr>
+                <tr><td class="bio-label">Pekerjaan</td><td class="bio-sep">:</td><td class="fill-pekerjaan"></td></tr>
+                <tr><td class="bio-label">Alamat</td><td class="bio-sep">:</td><td class="fill-alamat"></td></tr>
+                <tr><td class="bio-label"></td><td class="bio-sep"></td><td class="fill-desa-kec"></td></tr>
+                <tr><td class="bio-label">Nomer Telepon</td><td class="bio-sep">:</td><td class="fill-hp"></td></tr>
+            </table>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="cv-section-title">DATA PENDIDIKAN :</h3>
+                <button onclick="addRow('pendidikan')" class="no-print text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-bold shadow active:scale-95 flex items-center gap-1"><i data-lucide="plus-circle" class="w-3 h-3"></i> Tambah</button>
+            </div>
+            <div class="table-responsive">
+                <table class="cv-table">
+                    <thead>
+                        <tr>
+                            <th class="w-8">NO</th>
+                            <th class="min-w-[150px]">Nama Sekolah/Perguruan Tinggi</th>
+                            <th class="w-20">Tahun</th>
+                            <th class="w-20">Tahun Lulus</th>
+                            <th class="w-8 no-print">#</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyPendidikan"></tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="cv-section-title">PENGALAMAN ORGANISASI :</h3>
+                <button onclick="addRow('organisasi')" class="no-print text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-bold shadow active:scale-95 flex items-center gap-1"><i data-lucide="plus-circle" class="w-3 h-3"></i> Tambah</button>
+            </div>
+            <div class="table-responsive">
+                <table class="cv-table">
+                    <thead>
+                        <tr>
+                            <th class="w-8">NO</th>
+                            <th class="min-w-[150px]">Nama Organisasi</th>
+                            <th class="w-40">Tahun S/d Tahun</th>
+                            <th class="w-8 no-print">#</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyOrganisasi"></tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="cv-section-title">PENGALAMAN KERJA :</h3>
+                <button onclick="addRow('pekerjaan')" class="no-print text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-bold shadow active:scale-95 flex items-center gap-1"><i data-lucide="plus-circle" class="w-3 h-3"></i> Tambah</button>
+            </div>
+            <div class="table-responsive">
+                <table class="cv-table">
+                    <thead>
+                        <tr>
+                            <th class="w-8">NO</th>
+                            <th class="min-w-[150px]">Bidang Pekerjaan</th>
+                            <th class="w-40">Tahun S/d Tahun</th>
+                            <th class="w-8 no-print">#</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyPekerjaan"></tbody>
+                </table>
+            </div>
+
+            <div class="signature-section" style="margin-top: 20px;">
+                <div class="sig-box">
+                    <p>Hormat Kami</p>
+                    <div class="sig-space" style="height: 50px;"></div>
+                    <p class="font-bold border-b border-black inline-block min-w-[150px] fill-nama-upper"></p>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
     <script>
         lucide.createIcons();
         let currentUser = null;
         
-        // Data State
         let dataPendidikan = [];
         let dataOrganisasi = [];
         let dataPekerjaan = [];
@@ -176,13 +345,11 @@
             e.preventDefault();
             const nik = document.getElementById('inputNik').value;
             const btn = document.getElementById('btnLogin');
-            
             btn.innerHTML = 'Memeriksa...'; btn.disabled = true;
 
             try {
                 const res = await fetch('/api/pengurus/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ nik })
                 });
                 const result = await res.json();
@@ -193,33 +360,31 @@
                     document.getElementById('mainApp').classList.remove('hidden');
                     loadUserData();
                     loadHistoryData();
-                    Swal.fire({ icon: 'success', title: `Selamat Datang, ${currentUser.nama}`, timer: 1500, showConfirmButton: false });
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch(err) {
-                Swal.fire('Login Gagal', err.message, 'error');
-            } finally {
-                btn.innerHTML = 'MASUK'; btn.disabled = false;
-            }
+                    Swal.fire({ icon: 'success', title: `Selamat Datang, ${currentUser.nama}`, timer: 1000, showConfirmButton: false });
+                } else { throw new Error(result.error); }
+            } catch(err) { Swal.fire('Login Gagal', err.message, 'error'); } 
+            finally { btn.innerHTML = 'MASUK'; btn.disabled = false; }
         }
 
         function loadUserData() {
             if(!currentUser) return;
-            // Navbar
             document.getElementById('navName').innerText = currentUser.nama;
             document.getElementById('navNik').innerText = `NIK: ${currentUser.nik}`;
             
-            // CV Data Pribadi
-            document.getElementById('cvNama').innerText = currentUser.nama;
-            document.getElementById('cvTtl').innerText = `${currentUser.tempat_lahir || '-'}, ${currentUser.tanggal_lahir || '-'}`;
-            document.getElementById('cvJk').innerText = currentUser.jenis_kelamin || '-';
-            document.getElementById('cvAgama').innerText = currentUser.agama || '-';
-            document.getElementById('cvPekerjaan').innerText = currentUser.pekerjaan || '-';
-            document.getElementById('cvAlamat').innerText = `Kp/Jalan: ${currentUser.alamat || '-'} RT ${currentUser.rt || '-'} RW ${currentUser.rw || '-'}`;
-            document.getElementById('cvDesaKec').innerText = `Desa/Kel. ${currentUser.nama_desa || '-'} Kec. ${currentUser.nama_kecamatan || '-'}`;
-            document.getElementById('cvHp').innerText = currentUser.no_hp || '-';
-            document.getElementById('ttdNama').innerText = `( ${currentUser.nama} )`;
+            const today = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            document.querySelectorAll('.current-date').forEach(el => el.innerText = today);
+
+            const isi = (selector, val) => document.querySelectorAll(selector).forEach(el => el.innerText = val || '-');
+            
+            isi('.fill-nama', currentUser.nama);
+            isi('.fill-nama-upper', `( ${currentUser.nama.toUpperCase()} )`);
+            isi('.fill-ttl', `${currentUser.tempat_lahir || ''}, ${currentUser.tanggal_lahir || ''}`);
+            isi('.fill-pekerjaan', currentUser.pekerjaan);
+            isi('.fill-hp', currentUser.no_hp);
+            isi('.fill-alamat', `Kp/Jalan: ${currentUser.alamat || ''} RT ${currentUser.rt || '-'} RW ${currentUser.rw || '-'}`);
+            isi('.fill-desa-kec', `Desa/Kel. ${currentUser.nama_desa || ''} Kec. ${currentUser.nama_kecamatan || ''}`);
+            isi('.fill-jk', currentUser.jenis_kelamin);
+            isi('.fill-agama', currentUser.agama);
         }
 
         async function loadHistoryData() {
@@ -227,20 +392,16 @@
                 const res = await fetch(`/api/pengurus/cv?nik=${currentUser.nik}`);
                 const data = await res.json();
 
-                // Parse JSON, jika kosong/null jadikan array kosong
                 dataPendidikan = data.riwayat_pendidikan ? JSON.parse(data.riwayat_pendidikan) : [];
                 dataOrganisasi = data.riwayat_organisasi ? JSON.parse(data.riwayat_organisasi) : [];
                 dataPekerjaan  = data.riwayat_pekerjaan ? JSON.parse(data.riwayat_pekerjaan) : [];
 
-                // Jika kosong banget, kasih 3 baris default kosong biar mirip template
                 if(dataPendidikan.length === 0) for(let i=0;i<3;i++) dataPendidikan.push({nama:'', tahun:'', lulus:''});
                 if(dataOrganisasi.length === 0) for(let i=0;i<3;i++) dataOrganisasi.push({nama:'', periode:''});
                 if(dataPekerjaan.length === 0)  for(let i=0;i<3;i++) dataPekerjaan.push({bidang:'', periode:''});
 
                 renderAllTables();
-            } catch(e) {
-                console.error("Gagal load history", e);
-            }
+            } catch(e) {}
         }
 
         // --- RENDER TABLES ---
@@ -248,6 +409,7 @@
             renderTable('pendidikan', dataPendidikan, ['nama', 'tahun', 'lulus']);
             renderTable('organisasi', dataOrganisasi, ['nama', 'periode']);
             renderTable('pekerjaan', dataPekerjaan, ['bidang', 'periode']);
+            lucide.createIcons();
         }
 
         function renderTable(type, dataArray, keys) {
@@ -256,25 +418,24 @@
 
             dataArray.forEach((item, index) => {
                 const tr = document.createElement('tr');
-                let colsHtml = `<td class="border border-black p-1 text-center font-serif">${index + 1}</td>`;
+                let colsHtml = `<td class="text-center">${index + 1}</td>`;
                 
                 keys.forEach(key => {
-                    let widthClass = (type === 'pendidikan' && key !== 'nama') || (type !== 'pendidikan' && key === 'periode') ? 'text-center' : '';
-                    colsHtml += `<td class="border border-black p-1 ${widthClass}">
-                        <input type="text" value="${item[key] || ''}" oninput="updateData('${type}', ${index}, '${key}', this.value)" class="w-full bg-transparent outline-none font-serif">
+                    let align = (key === 'tahun' || key === 'lulus' || key === 'periode') ? 'text-center' : '';
+                    // Gunakan class 'editable' yang sudah distyle agar enak di HP
+                    colsHtml += `<td class="${align}">
+                        <input type="text" value="${item[key] || ''}" oninput="updateData('${type}', ${index}, '${key}', this.value)" class="editable">
                     </td>`;
                 });
 
-                colsHtml += `<td class="border border-black p-1 text-center action-col no-print">
-                    <button onclick="removeRow('${type}', ${index})" class="text-red-500 hover:text-red-700">x</button>
+                colsHtml += `<td class="text-center no-print">
+                    <button onclick="removeRow('${type}', ${index})" class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </td>`;
-                
                 tr.innerHTML = colsHtml;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- DATA MANIPULATION ---
         function updateData(type, index, key, value) {
             if(type === 'pendidikan') dataPendidikan[index][key] = value;
             if(type === 'organisasi') dataOrganisasi[index][key] = value;
@@ -297,34 +458,18 @@
 
         async function saveData() {
             const btn = document.querySelector('button[onclick="saveData()"]');
-            const originalText = btn.innerHTML;
-            btn.innerText = "Menyimpan..."; btn.disabled = true;
-
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '...'; btn.disabled = true;
             try {
-                const payload = {
-                    nik: currentUser.nik,
-                    pendidikan: dataPendidikan,
-                    organisasi: dataOrganisasi,
-                    pekerjaan: dataPekerjaan
-                };
-
                 const res = await fetch('/api/pengurus/cv', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nik: currentUser.nik, pendidikan: dataPendidikan, organisasi: dataOrganisasi, pekerjaan: dataPekerjaan })
                 });
-                
                 const result = await res.json();
-                if(result.success) {
-                    Swal.fire('Berhasil', 'Data Riwayat Hidup telah disimpan.', 'success');
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch(e) {
-                Swal.fire('Gagal', e.message, 'error');
-            } finally {
-                btn.innerHTML = originalText; btn.disabled = false;
-            }
+                if(result.success) Swal.fire('Tersimpan', 'Data Riwayat Hidup telah disimpan.', 'success');
+                else throw new Error(result.error);
+            } catch(e) { Swal.fire('Gagal', e.message, 'error'); } 
+            finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
 
         function logout() {
@@ -333,7 +478,6 @@
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('inputNik').value = '';
         }
-
     </script>
 </body>
 </html>
