@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Font Arimo agar mirip dengan font asli KTP */
         @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700;800&display=swap');
 
         body {
@@ -19,15 +18,9 @@
             font-family: 'Arimo', sans-serif;
         }
 
-        /* UKURAN KARTU (2 SISI VERTIKAL / ATAS-BAWAH) 
-           Lebar Standar ID-1: 85.6mm
-           Tinggi 1 Sisi: 53.98mm
-           Tinggi Total (Depan + Belakang): 107.96mm
-        */
         .kta-card {
             width: 85.6mm;
             height: 107.96mm; 
-            /* Gambar blanko harus mencakup sisi depan (atas) dan belakang (bawah) */
             background-image: url('/kta_blanko.png');
             background-size: 100% 100%; 
             background-repeat: no-repeat;
@@ -36,32 +29,35 @@
             overflow: hidden;
             color: #000;
             background-color: white;
-            /* Memastikan warna akurat saat cetak */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* --- POSISI DATA (HANYA DI SISI DEPAN / BAGIAN ATAS) --- */
+        /* --- POSISI DATA --- */
 
         /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
-            top: 27mm;      /* Jarak dari tepi atas */
-            left: 4.5mm;    /* Jarak dari tepi kiri */
+            /* Foto ikut naik sedikit menyesuaikan teks */
+            top: 24.5mm;      
+            left: 4.5mm;    
             width: 15mm;
             height: 19mm;
             object-fit: cover;
             border-radius: 2px;
             z-index: 10;
-            background-color: #ddd; /* Placeholder warna abu */
+            background-color: #ddd;
         }
 
         /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            top: 26.5mm;
-            left: 21mm; /* Tepat di sebelah kanan foto */
-            width: 44mm; /* Lebar area teks dibatasi agar tidak menabrak area QR bawaan blanko */
+            /* PERBAIKAN: Naik 10px (dari 26.5mm ke 24mm) */
+            top: 24mm;
+            left: 21mm; 
+            width: 44mm; 
+            padding-left: 2.5mm; 
+            box-sizing: border-box; 
             line-height: 1.15;
             z-index: 10;
         }
@@ -87,10 +83,9 @@
             font-size: 5.5pt;
             font-weight: 400;
             color: #222;
-            line-height: 1.25;
+            line-height: 1.2; /* Sedikit dirapatkan spasi barisnya */
         }
 
-        /* CSS KHUSUS PRINT */
         @media print {
             body { 
                 background: white; 
@@ -103,8 +98,7 @@
             .no-print { display: none !important; }
             .kta-card {
                 box-shadow: none;
-                margin-top: 10mm; /* Margin atas agar tidak terpotong printer */
-                /* Memaksa background image tercetak */
+                margin-top: 5mm; 
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -136,7 +130,7 @@
             </div>
         </div>
 
-        </div>
+    </div>
 
     <script>
         lucide.createIcons();
@@ -152,38 +146,37 @@
             }
 
             try {
-                // Panggil API Backend
                 const res = await fetch(`/api/get-kta?${id ? 'id='+id : 'nik='+nik}`);
                 const data = await res.json();
 
                 if (data.error) throw new Error(data.error);
 
-                // Populate Data Teks
                 document.getElementById('txtKta').innerText = data.no_kta || "-";
                 document.getElementById('txtNama').innerText = data.nama || "-";
                 
                 const tgl = data.tanggal_lahir || "";
                 document.getElementById('txtTtl').innerText = `${data.tempat_lahir || 'CIANJUR'} / ${tgl}`;
 
-                // Format Alamat
-                // Potong string agar muat di kotak kecil (Max sekitar 80 karakter)
-                let alamatLengkap = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, Jawa Barat`.toUpperCase();
-                if(alamatLengkap.length > 85) alamatLengkap = alamatLengkap.substring(0, 82) + "...";
+                // PERBAIKAN FORMAT ALAMAT
+                // 1. Susun string baris pertama
+                let baris1 = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, KABUPATEN CIANJUR`.toUpperCase();
                 
-                document.getElementById('txtAlamat').innerText = alamatLengkap;
+                // Potong jika terlalu panjang (agar tidak menabrak batas kanan)
+                if(baris1.length > 85) baris1 = baris1.substring(0, 82) + "...";
+
+                // 2. Masukkan ke HTML dengan <br> untuk Jawa Barat
+                document.getElementById('txtAlamat').innerHTML = `${baris1}<br>JAWA BARAT`;
+                
                 document.getElementById('txtHp').innerText = `Telp : ${data.no_hp_format || '-'}`;
 
-                // Populate Foto Profile
                 if (data.foto_orang_url) {
                     document.getElementById('imgFoto').src = data.foto_orang_url;
                 } else if (data.foto_url) {
-                    // Fallback ke foto KTP jika selfie tidak ada
                     document.getElementById('imgFoto').src = data.foto_url; 
                 }
 
             } catch (e) {
                 alert("Gagal memuat data: " + e.message);
-                console.error(e);
             }
         }
 
