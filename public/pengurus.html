@@ -38,27 +38,26 @@
             
             /* Responsive Logic */
             width: 100%; 
-            max-width: 210mm; /* Mentok di ukuran A4 kalau di laptop */
-            min-height: 297mm; /* Tinggi minimal A4 */
+            max-width: 210mm; 
+            min-height: 297mm; /* Tinggi A4 di layar HP/Laptop */
             
             /* Font Dokumen */
             font-family: "Times New Roman", Times, serif;
             color: black;
             box-sizing: border-box;
+            position: relative;
         }
 
         /* Penyesuaian Khusus Layar HP Kecil */
         @media screen and (max-width: 640px) {
             .a4-page {
-                padding: 15px; /* Margin diperkecil di HP biar muat banyak */
-                min-height: auto; /* Tinggi bebas di HP */
+                padding: 15px; 
+                min-height: auto; 
                 margin: 10px auto;
-                width: 95%; /* Ada sela dikit di pinggir */
+                width: 95%; 
             }
-            .bio-label { width: 100px !important; } /* Label diperpendek di HP */
+            .bio-label { width: 100px !important; }
             .doc-h1 { font-size: 12pt !important; }
-            
-            /* Tabel bisa discroll menyamping di HP agar tidak hancur */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -68,28 +67,47 @@
             }
         }
 
-        /* --- 2. SETUP KHUSUS CETAK (PASTI A4) --- */
+        /* --- 2. SETUP KHUSUS CETAK (FIX HALAMAN KOSONG) --- */
         @media print {
-            @page { size: A4; margin: 15mm; }
-            body { background: white; -webkit-print-color-adjust: exact; }
+            /* Atur Margin Kertas di sini */
+            @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
             
-            /* Sembunyikan Elemen UI */
+            body { 
+                background: white; 
+                -webkit-print-color-adjust: exact; 
+                margin: 0; padding: 0;
+            }
+            
+            /* Sembunyikan UI */
             #loginSection, #toolbar, .no-print, button, nav { display: none !important; }
             
-            /* Reset Container ke Ukuran Pasti A4 */
-            #mainApp { display: block !important; padding: 0 !important; }
+            /* Reset Container */
+            #mainApp { display: block !important; padding: 0 !important; margin: 0 !important; }
+            
             .a4-page {
                 width: 100% !important; 
                 max-width: none !important;
                 margin: 0 !important; 
-                padding: 0 !important; 
+                padding: 0 !important; /* Padding 0 karena margin sudah diatur di @page */
                 box-shadow: none !important; 
                 border: none !important;
-                page-break-after: always; /* Wajib ganti halaman */
+                
+                /* PERBAIKAN UTAMA: Reset Tinggi agar tidak memaksa halaman baru */
+                min-height: 0 !important; 
+                height: auto !important;
+                
+                /* Paksa Ganti Halaman */
+                page-break-after: always;
+                break-after: page;
             }
-            .a4-page:last-child { page-break-after: auto; }
             
-            /* Reset Input Menjadi Teks Biasa (Tanpa Kotak) */
+            /* Jangan ganti halaman setelah elemen terakhir */
+            .a4-page:last-of-type { 
+                page-break-after: auto !important; 
+                break-after: auto !important; 
+            }
+            
+            /* Reset Input */
             input, textarea, input.editable { 
                 border: none !important; 
                 background: transparent !important; 
@@ -100,10 +118,7 @@
                 color: black !important;
             }
             
-            /* Hapus Scrollbar Tabel saat Print */
             .table-responsive { border: none; overflow: visible; }
-            
-            /* CV Compact agar muat */
             .cv-compact { font-size: 10pt; }
             .cv-compact th, .cv-compact td { padding: 2px 4px !important; }
         }
@@ -127,7 +142,7 @@
         .sig-space { height: 70px; }
         
         /* CV Styling */
-        .cv-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt; min-width: 600px; /* Agar di HP bisa discroll */ }
+        .cv-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt; min-width: 600px; }
         .cv-table th, .cv-table td { border: 1px solid black; padding: 4px; vertical-align: middle; }
         .cv-table th { text-align: center; font-weight: bold; background-color: #f8fafc; }
         @media print { .cv-table th { background-color: transparent !important; } }
@@ -422,7 +437,6 @@
                 
                 keys.forEach(key => {
                     let align = (key === 'tahun' || key === 'lulus' || key === 'periode') ? 'text-center' : '';
-                    // Gunakan class 'editable' yang sudah distyle agar enak di HP
                     colsHtml += `<td class="${align}">
                         <input type="text" value="${item[key] || ''}" oninput="updateData('${type}', ${index}, '${key}', this.value)" class="editable">
                     </td>`;
