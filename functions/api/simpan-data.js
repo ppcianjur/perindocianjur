@@ -13,21 +13,23 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ success: false, error: "NIK sudah terdaftar." }), { status: 409 });
         }
 
-        // PERBAIKAN: Menambahkan kolom jenis_kelamin
+        // PERBAIKAN: Menambahkan kolom jenis_kelamin, agama, pekerjaan, foto_kta
         const query = `
             INSERT INTO pengurus (
                 nik, nama, jenis_kelamin, tempat_lahir, tanggal_lahir, 
+                agama, pekerjaan,
                 alamat, rt, rw, kelurahan, 
-                kode_desa_lengkap, foto_url, foto_orang_url, no_hp, 
+                kode_desa_lengkap, foto_url, foto_orang_url, foto_kta, no_hp, 
                 jabatan, creator, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
         `;
 
         await db.prepare(query)
             .bind(
                 req.nik, req.nama.toUpperCase(), req.jenis_kelamin, req.tempat_lahir, req.tanggal_lahir,
+                req.agama, req.pekerjaan,
                 req.alamat, req.rt, req.rw, req.nama_desa, 
-                req.kode_desa_lengkap, req.foto_url, req.foto_orang_url, req.no_hp, 
+                req.kode_desa_lengkap, req.foto_url, req.foto_orang_url, req.foto_kta, req.no_hp, 
                 req.jabatan, req.creator
             )
             .run();
