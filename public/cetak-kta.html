@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.3.0/dom-to-image-more.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         /* Font Calibri sebagai font utama */
@@ -36,11 +37,11 @@
             print-color-adjust: exact;
         }
 
-        /* --- POSISI DATA (DINAIKKAN 10PX / ~3MM) --- */
+        /* --- POSISI DATA --- */
 
+        /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
-            /* SEBELUMNYA 24.5mm -> SEKARANG 21.5mm */
             top: 21.5mm;      
             left: 4.5mm;    
             width: 15mm;
@@ -53,9 +54,9 @@
             outline: none !important;
         }
 
+        /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            /* SEBELUMNYA 24mm -> SEKARANG 21mm */
             top: 21mm; 
             left: 21mm; 
             width: 44mm; 
@@ -63,67 +64,51 @@
             box-sizing: border-box; 
             line-height: 1.15;
             z-index: 10;
-            
-            /* RESET CSS */
             border: none !important;
             outline: none !important;
             background: transparent !important;
         }
 
         .text-area * {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
+            border: none !important; outline: none !important; background: transparent !important;
         }
+
+        /* 3. QR CODE AREA (BARU) */
+        .qr-area {
+            position: absolute;
+            top: 21.5mm;  /* Sejajar dengan bagian atas foto */
+            right: 5mm;   /* Jarak dari kanan */
+            width: 17mm;  /* Ukuran kotak QR */
+            height: 17mm;
+            background-color: white; /* Latar putih untuk menutupi yang buram */
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1px; /* Sedikit padding agar tidak terlalu mepet */
+        }
+        /* Agar gambar QR mengisi kotaknya */
+        .qr-area img {
+            width: 100%;
+            height: auto;
+        }
+
 
         /* --- STYLE FONT (CALIBRI & UKURAN SAMA) --- */
-        
         .kta-number {
-            font-family: 'Calibri', sans-serif;
-            font-size: 9pt;     
-            font-weight: 700;   /* Bold */
-            color: #000000;
-            margin-bottom: 2px;
-            letter-spacing: 0px; 
+            font-family: 'Calibri', sans-serif; font-size: 9pt; font-weight: 700; color: #000000; margin-bottom: 2px; letter-spacing: 0px; 
         }
-
         .kta-name {
-            font-family: 'Calibri', sans-serif;
-            font-size: 9pt;     
-            font-weight: 700;   /* Bold */
-            text-transform: uppercase;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #000000;
+            font-family: 'Calibri', sans-serif; font-size: 9pt; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000000;
         }
-
         .kta-details {
-            font-family: 'Calibri', sans-serif;
-            font-size: 6.5pt; 
-            font-weight: 400; /* Regular */
-            color: #000000;   /* Hitam pekat */
-            line-height: 1.25;
+            font-family: 'Calibri', sans-serif; font-size: 6.5pt; font-weight: 400; color: #000000; line-height: 1.25;
         }
 
         @media print {
-            body { 
-                background: white; 
-                margin: 0; 
-                padding: 0; 
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-            }
+            body { background: white; margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start; }
             .no-print { display: none !important; }
-            .kta-card {
-                box-shadow: none;
-                margin-top: 5mm; 
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+            .kta-card { box-shadow: none; margin-top: 5mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -153,6 +138,8 @@
                 <div id="txtHp" style="margin-top: 2px;">...</div>
             </div>
         </div>
+
+        <div id="qrcode" class="qr-area"></div>
     </div>
 
     <script>
@@ -165,6 +152,8 @@
 
             if (!id && !nik) {
                 alert("Data tidak ditemukan (ID/NIK kosong).");
+                // Generate QR meskipun data kosong (opsional)
+                generateQR();
                 return;
             }
 
@@ -191,20 +180,35 @@
                 } else if (data.foto_url) {
                     document.getElementById('imgFoto').src = data.foto_url; 
                 }
+                
+                // Generate QR Code setelah data termuat
+                generateQR();
 
             } catch (e) {
                 alert("Gagal memuat data: " + e.message);
             }
         }
 
+        // FUNGSI GENERATE QR CODE STATIS
+        function generateQR() {
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = ""; // Bersihkan jika ada sebelumnya
+
+            new QRCode(qrContainer, {
+                text: "https://partaiperindo.com/", // URL Statis
+                width: 128, // Ukuran resolusi gambar (akan disesuaikan CSS)
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H // Koreksi kesalahan tinggi agar tajam
+            });
+        }
+
         // FUNGSI DOWNLOAD PNG (DOM-TO-IMAGE-MORE)
         function downloadImage() {
             const card = document.getElementById('card');
             const namaFile = document.getElementById('txtNama').innerText || 'KTA_PERINDO';
-            
             document.body.style.cursor = 'wait';
-
-            // Skala Resolusi (4x agar tajam setara retina display)
             const scale = 4;
 
             domtoimage.toPng(card, {
