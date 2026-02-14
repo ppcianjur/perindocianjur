@@ -73,36 +73,62 @@
             border: none !important; outline: none !important; background: transparent !important;
         }
 
-        /* 3. QR CODE AREA (BARU) */
+        /* 3. QR CODE AREA (DISESUAIKAN) */
         .qr-area {
             position: absolute;
-            top: 21.5mm;  /* Sejajar dengan bagian atas foto */
-            right: 5mm;   /* Jarak dari kanan */
-            width: 17mm;  /* Ukuran kotak QR */
-            height: 17mm;
-            background-color: white; /* Latar putih untuk menutupi yang buram */
+            top: 21.5mm;  
+            right: 5mm;   
+            /* UKURAN DIKURANGI AGAR LEBIH KECIL & PERSEGI */
+            width: 15.5mm;  /* Awalnya 17mm, dikurangi ~5px (1.5mm) */
+            height: 15.5mm;
+            background-color: white; 
             z-index: 10;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1px; /* Sedikit padding agar tidak terlalu mepet */
+            padding: 1px; 
         }
-        /* Agar gambar QR mengisi kotaknya */
         .qr-area img {
             width: 100%;
             height: auto;
         }
 
-
-        /* --- STYLE FONT (CALIBRI & UKURAN SAMA) --- */
+        /* --- STYLE FONT (CALIBRI) --- */
+        
         .kta-number {
-            font-family: 'Calibri', sans-serif; font-size: 9pt; font-weight: 700; color: #000000; margin-bottom: 2px; letter-spacing: 0px; 
+            font-family: 'Calibri', sans-serif; 
+            font-size: 9pt; 
+            font-weight: 700; 
+            color: #000000; 
+            letter-spacing: 0px; 
+            
+            /* PERBAIKAN POSISI: Turun 5px & Rapatkan Bawah */
+            margin-top: 5px; 
+            margin-bottom: 0px; /* Jarak ke nama dirapatkan (0px) */
+            line-height: 1.1;
         }
+
         .kta-name {
-            font-family: 'Calibri', sans-serif; font-size: 9pt; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000000;
+            font-family: 'Calibri', sans-serif; 
+            font-size: 9pt; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            
+            margin-bottom: 3px; 
+            
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            color: #000000;
+            line-height: 1.1;
         }
+
         .kta-details {
-            font-family: 'Calibri', sans-serif; font-size: 6.5pt; font-weight: 400; color: #000000; line-height: 1.25;
+            font-family: 'Calibri', sans-serif; 
+            font-size: 6.5pt; 
+            font-weight: 400; 
+            color: #000000; 
+            line-height: 1.25;
         }
 
         @media print {
@@ -152,7 +178,6 @@
 
             if (!id && !nik) {
                 alert("Data tidak ditemukan (ID/NIK kosong).");
-                // Generate QR meskipun data kosong (opsional)
                 generateQR();
                 return;
             }
@@ -181,7 +206,6 @@
                     document.getElementById('imgFoto').src = data.foto_url; 
                 }
                 
-                // Generate QR Code setelah data termuat
                 generateQR();
 
             } catch (e) {
@@ -189,18 +213,18 @@
             }
         }
 
-        // FUNGSI GENERATE QR CODE STATIS
+        // FUNGSI GENERATE QR CODE
         function generateQR() {
             const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = ""; // Bersihkan jika ada sebelumnya
+            qrContainer.innerHTML = ""; 
 
             new QRCode(qrContainer, {
-                text: "https://partaiperindo.com/", // URL Statis
-                width: 128, // Ukuran resolusi gambar (akan disesuaikan CSS)
+                text: "https://partaiperindo.com/", 
+                width: 128, 
                 height: 128,
                 colorDark : "#000000",
                 colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H // Koreksi kesalahan tinggi agar tajam
+                correctLevel : QRCode.CorrectLevel.H 
             });
         }
 
