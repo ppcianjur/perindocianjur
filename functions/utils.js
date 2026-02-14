@@ -9,8 +9,8 @@ export async function extractKTPData(base64Image, db) {
     const payload = {
         contents: [{
             parts: [
-                // PERBAIKAN: Menambahkan 'jenis_kelamin' ke prompt
-                { text: "Ekstrak data KTP: nik, nama, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, rt, rw, kelurahan, kecamatan. HANYA JSON mentah." },
+                // PERBAIKAN: Menambahkan 'agama' dan 'pekerjaan' ke prompt
+                { text: "Ekstrak data KTP: nik, nama, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, rt, rw, kelurahan, kecamatan, agama, pekerjaan. HANYA JSON mentah." },
                 { inline_data: { mime_type: "image/jpeg", data: base64Image } }
             ]
         }],
