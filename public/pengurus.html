@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Pengurus - Curriculum Vitae</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* CSS Tampilan Layar */
+        .btn-action { @apply p-1 rounded hover:bg-slate-100 transition-colors; }
+        input.editable { @apply w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none; }
+        
+        /* CSS KHUSUS CETAK (Agar mirip format Word/Gambar yang diminta) */
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            body { background: white; font-family: "Times New Roman", Times, serif; color: black; -webkit-print-color-adjust: exact; }
+            
+            /* Sembunyikan elemen UI Aplikasi saat print */
+            #loginSection, #toolbar, .no-print, button, .btn-add-row, .action-col { display: none !important; }
+            
+            /* Tampilkan Section Utama */
+            #cvSection { display: block !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; }
+            
+            /* Styling Judul */
+            h1.cv-title { text-align: center; font-weight: bold; text-decoration: underline; font-size: 16pt; margin-bottom: 20px; text-transform: uppercase; }
+            
+            /* Styling Sub-Judul */
+            h3.section-title { font-weight: bold; font-size: 12pt; margin-top: 15px; margin-bottom: 5px; text-decoration: underline; text-transform: uppercase; }
+            
+            /* Styling Tabel Biodata */
+            .bio-table { width: 100%; font-size: 12pt; line-height: 1.5; margin-bottom: 15px; }
+            .bio-table td { vertical-align: top; }
+            .bio-label { width: 180px; }
+            .bio-sep { width: 10px; }
+
+            /* Styling Tabel Riwayat */
+            .data-table { width: 100%; border-collapse: collapse; font-size: 11pt; margin-bottom: 15px; }
+            .data-table th, .data-table td { border: 1px solid black; padding: 5px; vertical-align: middle; }
+            .data-table th { text-align: center; font-weight: bold; background-color: transparent !important; }
+            .data-table input { border: none !important; background: transparent !important; width: 100%; font-family: inherit; font-size: inherit; padding: 0; margin: 0; }
+            
+            /* Signature Area */
+            .signature { margin-top: 50px; text-align: right; width: 100%; }
+            .signature div { display: inline-block; text-align: center; width: 200px; }
+            
+            /* Reset Inputs untuk Print */
+            input { border: none; background: transparent; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <div id="loginSection" class="fixed inset-0 z-50 bg-slate-100 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center border border-slate-200">
+            <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="w-20 h-auto mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-slate-800">Portal Data Pengurus</h1>
+            <p class="text-slate-500 mb-6 text-sm">Silakan masukkan NIK Anda untuk mengakses data.</p>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="text" id="inputNik" placeholder="Nomor Induk Kependudukan (NIK)" class="w-full p-4 rounded-xl border border-slate-300 text-center font-bold text-lg tracking-widest outline-none focus:ring-2 focus:ring-blue-600 shadow-sm" required inputmode="numeric">
+                <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95">MASUK</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden pb-20">
+        
+        <nav id="toolbar" class="bg-white border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-3">
+                <img src="https://perindocianjur.pages.dev/perindo.png" alt="Logo" class="w-8 h-8">
+                <div>
+                    <h2 class="font-bold text-slate-800 leading-tight" id="navName">Nama Pengurus</h2>
+                    <p class="text-[10px] text-slate-500 font-mono" id="navNik">NIK: ...</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="saveData()" class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700 shadow"><i data-lucide="save" class="w-4 h-4"></i> Simpan</button>
+                <button onclick="window.print()" class="flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 shadow"><i data-lucide="printer" class="w-4 h-4"></i> Cetak</button>
+                <button onclick="logout()" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+            </div>
+        </nav>
+
+        <div class="max-w-[210mm] mx-auto mt-8 bg-white shadow-2xl min-h-[297mm] p-[15mm] md:p-[20mm]" id="cvSection">
+            
+            <h1 class="cv-title text-center font-bold text-2xl underline mb-8 uppercase font-serif">CURRICULUM VITAE</h1>
+
+            <h3 class="section-title font-serif font-bold text-lg underline uppercase mb-2">DATA PRIBADI :</h3>
+            <table class="bio-table font-serif mb-6 w-full">
+                <tr><td class="bio-label font-bold">Nama</td><td class="bio-sep">:</td><td id="cvNama"></td></tr>
+                <tr><td class="bio-label font-bold">Tempat/Tgl.Lahir</td><td class="bio-sep">:</td><td id="cvTtl"></td></tr>
+                <tr><td class="bio-label font-bold">Jenis Kelamin</td><td class="bio-sep">:</td><td id="cvJk"></td></tr>
+                <tr><td class="bio-label font-bold">Agama</td><td class="bio-sep">:</td><td id="cvAgama"></td></tr>
+                <tr><td class="bio-label font-bold">Pekerjaan</td><td class="bio-sep">:</td><td id="cvPekerjaan"></td></tr>
+                <tr><td class="bio-label font-bold">Alamat</td><td class="bio-sep">:</td><td id="cvAlamat"></td></tr>
+                <tr><td class="bio-label font-bold"></td><td class="bio-sep"></td><td id="cvDesaKec"></td></tr>
+                <tr><td class="bio-label font-bold">Nomer Telepon</td><td class="bio-sep">:</td><td id="cvHp"></td></tr>
+            </table>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="section-title font-serif font-bold text-lg underline uppercase">DATA PENDIDIKAN :</h3>
+                <button onclick="addRow('pendidikan')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
+            </div>
+            <table class="data-table w-full mb-6 border-collapse border border-black font-serif">
+                <thead>
+                    <tr>
+                        <th class="border border-black p-1 w-10 text-center">NO</th>
+                        <th class="border border-black p-1">Nama Sekolah/Fakultas/Perguruan Tinggi</th>
+                        <th class="border border-black p-1 w-24 text-center">Tahun</th>
+                        <th class="border border-black p-1 w-24 text-center">Tahun Lulus</th>
+                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyPendidikan"></tbody>
+            </table>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="section-title font-serif font-bold text-lg underline uppercase">PENGALAMAN ORGANISASI :</h3>
+                <button onclick="addRow('organisasi')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
+            </div>
+            <table class="data-table w-full mb-6 border-collapse border border-black font-serif">
+                <thead>
+                    <tr>
+                        <th class="border border-black p-1 w-10 text-center">NO</th>
+                        <th class="border border-black p-1">Nama Organisasi</th>
+                        <th class="border border-black p-1 w-48 text-center">Tahun S/d Tahun</th>
+                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyOrganisasi"></tbody>
+            </table>
+
+            <div class="flex justify-between items-end mb-1">
+                <h3 class="section-title font-serif font-bold text-lg underline uppercase">PENGALAMAN KERJA :</h3>
+                <button onclick="addRow('pekerjaan')" class="no-print text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-bold">+ Tambah Baris</button>
+            </div>
+            <table class="data-table w-full mb-10 border-collapse border border-black font-serif">
+                <thead>
+                    <tr>
+                        <th class="border border-black p-1 w-10 text-center">NO</th>
+                        <th class="border border-black p-1">Bidang Pekerjaan</th>
+                        <th class="border border-black p-1 w-48 text-center">Tahun S/d Tahun</th>
+                        <th class="border border-black p-1 w-10 text-center action-col no-print">#</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyPekerjaan"></tbody>
+            </table>
+
+            <div class="signature font-serif">
+                <div>
+                    <p class="mb-20">Hormat Kami</p>
+                    <p class="font-bold border-b border-black inline-block pb-1 min-w-[150px]" id="ttdNama">(Nama Lengkap)</p>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="text-center text-slate-400 text-xs mt-8 mb-4 no-print">
+            &copy; 2026 Portal Pengurus - DPD Perindo Cianjur
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentUser = null;
+        
+        // Data State
+        let dataPendidikan = [];
+        let dataOrganisasi = [];
+        let dataPekerjaan = [];
+
+        // --- LOGIN LOGIC ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const nik = document.getElementById('inputNik').value;
+            const btn = document.getElementById('btnLogin');
+            
+            btn.innerHTML = 'Memeriksa...'; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/pengurus/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nik })
+                });
+                const result = await res.json();
+
+                if(result.success) {
+                    currentUser = result.data;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    loadUserData();
+                    loadHistoryData();
+                    Swal.fire({ icon: 'success', title: `Selamat Datang, ${currentUser.nama}`, timer: 1500, showConfirmButton: false });
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch(err) {
+                Swal.fire('Login Gagal', err.message, 'error');
+            } finally {
+                btn.innerHTML = 'MASUK'; btn.disabled = false;
+            }
+        }
+
+        function loadUserData() {
+            if(!currentUser) return;
+            // Navbar
+            document.getElementById('navName').innerText = currentUser.nama;
+            document.getElementById('navNik').innerText = `NIK: ${currentUser.nik}`;
+            
+            // CV Data Pribadi
+            document.getElementById('cvNama').innerText = currentUser.nama;
+            document.getElementById('cvTtl').innerText = `${currentUser.tempat_lahir || '-'}, ${currentUser.tanggal_lahir || '-'}`;
+            document.getElementById('cvJk').innerText = currentUser.jenis_kelamin || '-';
+            document.getElementById('cvAgama').innerText = currentUser.agama || '-';
+            document.getElementById('cvPekerjaan').innerText = currentUser.pekerjaan || '-';
+            document.getElementById('cvAlamat').innerText = `Kp/Jalan: ${currentUser.alamat || '-'} RT ${currentUser.rt || '-'} RW ${currentUser.rw || '-'}`;
+            document.getElementById('cvDesaKec').innerText = `Desa/Kel. ${currentUser.nama_desa || '-'} Kec. ${currentUser.nama_kecamatan || '-'}`;
+            document.getElementById('cvHp').innerText = currentUser.no_hp || '-';
+            document.getElementById('ttdNama').innerText = `( ${currentUser.nama} )`;
+        }
+
+        async function loadHistoryData() {
+            try {
+                const res = await fetch(`/api/pengurus/cv?nik=${currentUser.nik}`);
+                const data = await res.json();
+
+                // Parse JSON, jika kosong/null jadikan array kosong
+                dataPendidikan = data.riwayat_pendidikan ? JSON.parse(data.riwayat_pendidikan) : [];
+                dataOrganisasi = data.riwayat_organisasi ? JSON.parse(data.riwayat_organisasi) : [];
+                dataPekerjaan  = data.riwayat_pekerjaan ? JSON.parse(data.riwayat_pekerjaan) : [];
+
+                // Jika kosong banget, kasih 3 baris default kosong biar mirip template
+                if(dataPendidikan.length === 0) for(let i=0;i<3;i++) dataPendidikan.push({nama:'', tahun:'', lulus:''});
+                if(dataOrganisasi.length === 0) for(let i=0;i<3;i++) dataOrganisasi.push({nama:'', periode:''});
+                if(dataPekerjaan.length === 0)  for(let i=0;i<3;i++) dataPekerjaan.push({bidang:'', periode:''});
+
+                renderAllTables();
+            } catch(e) {
+                console.error("Gagal load history", e);
+            }
+        }
+
+        // --- RENDER TABLES ---
+        function renderAllTables() {
+            renderTable('pendidikan', dataPendidikan, ['nama', 'tahun', 'lulus']);
+            renderTable('organisasi', dataOrganisasi, ['nama', 'periode']);
+            renderTable('pekerjaan', dataPekerjaan, ['bidang', 'periode']);
+        }
+
+        function renderTable(type, dataArray, keys) {
+            const tbody = document.getElementById(type === 'pendidikan' ? 'tbodyPendidikan' : (type === 'organisasi' ? 'tbodyOrganisasi' : 'tbodyPekerjaan'));
+            tbody.innerHTML = '';
+
+            dataArray.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                let colsHtml = `<td class="border border-black p-1 text-center font-serif">${index + 1}</td>`;
+                
+                keys.forEach(key => {
+                    let widthClass = (type === 'pendidikan' && key !== 'nama') || (type !== 'pendidikan' && key === 'periode') ? 'text-center' : '';
+                    colsHtml += `<td class="border border-black p-1 ${widthClass}">
+                        <input type="text" value="${item[key] || ''}" oninput="updateData('${type}', ${index}, '${key}', this.value)" class="w-full bg-transparent outline-none font-serif">
+                    </td>`;
+                });
+
+                colsHtml += `<td class="border border-black p-1 text-center action-col no-print">
+                    <button onclick="removeRow('${type}', ${index})" class="text-red-500 hover:text-red-700">x</button>
+                </td>`;
+                
+                tr.innerHTML = colsHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- DATA MANIPULATION ---
+        function updateData(type, index, key, value) {
+            if(type === 'pendidikan') dataPendidikan[index][key] = value;
+            if(type === 'organisasi') dataOrganisasi[index][key] = value;
+            if(type === 'pekerjaan')  dataPekerjaan[index][key] = value;
+        }
+
+        function addRow(type) {
+            if(type === 'pendidikan') dataPendidikan.push({nama:'', tahun:'', lulus:''});
+            if(type === 'organisasi') dataOrganisasi.push({nama:'', periode:''});
+            if(type === 'pekerjaan')  dataPekerjaan.push({bidang:'', periode:''});
+            renderAllTables();
+        }
+
+        function removeRow(type, index) {
+            if(type === 'pendidikan') dataPendidikan.splice(index, 1);
+            if(type === 'organisasi') dataOrganisasi.splice(index, 1);
+            if(type === 'pekerjaan')  dataPekerjaan.splice(index, 1);
+            renderAllTables();
+        }
+
+        async function saveData() {
+            const btn = document.querySelector('button[onclick="saveData()"]');
+            const originalText = btn.innerHTML;
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+            try {
+                const payload = {
+                    nik: currentUser.nik,
+                    pendidikan: dataPendidikan,
+                    organisasi: dataOrganisasi,
+                    pekerjaan: dataPekerjaan
+                };
+
+                const res = await fetch('/api/pengurus/cv', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await res.json();
+                if(result.success) {
+                    Swal.fire('Berhasil', 'Data Riwayat Hidup telah disimpan.', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch(e) {
+                Swal.fire('Gagal', e.message, 'error');
+            } finally {
+                btn.innerHTML = originalText; btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('inputNik').value = '';
+        }
+
+    </script>
+</body>
+</html>
