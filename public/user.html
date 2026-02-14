@@ -208,6 +208,7 @@
             
             <div class="p-6 overflow-y-auto flex-1 bg-white space-y-6">
                 <input type="hidden" id="editFotoUrl"><input type="hidden" id="editFotoOrangUrl"><input type="hidden" id="editFotoKtaUrl">
+                <input type="hidden" id="editKodeKec"><input type="hidden" id="editKodeDesa">
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -216,103 +217,76 @@
                             <img id="displayKtp" class="w-full h-full object-cover">
                         </div>
                     </div>
+                    
                     <div class="space-y-2">
                         <p class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Foto Selfie</p>
                         <div class="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50 aspect-video shadow-sm">
                             <img id="displayOrang" class="w-full h-full object-cover">
-                            <div id="overlayEditFoto" class="absolute inset-0 bg-black/60 hidden flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                            <div id="overlayEditOrang" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                 <button onclick="document.getElementById('editFileOrang').click()" class="bg-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-slate-100">Ubah</button>
-                                <button onclick="hapusFotoOrang()" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-red-600">Hapus</button>
+                                <button onclick="hapusFoto('orang')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-red-600">Hapus</button>
                             </div>
                         </div>
-                        <input type="file" id="editFileOrang" class="hidden" accept="image/*" onchange="uploadNewFotoOrang(this)">
+                        <input type="file" id="editFileOrang" class="hidden" accept="image/*" onchange="uploadNewFoto(this, 'orang')">
+                    </div>
+
+                    <div class="space-y-2 col-span-2">
+                        <p class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Foto KTA</p>
+                        <div class="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50 aspect-video shadow-sm">
+                            <img id="displayKta" class="w-full h-full object-cover">
+                            <div id="overlayEditKta" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button onclick="document.getElementById('editFileKta').click()" class="bg-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-slate-100">Ubah</button>
+                                <button onclick="hapusFoto('kta')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-red-600">Hapus</button>
+                            </div>
+                        </div>
+                        <input type="file" id="editFileKta" class="hidden" accept="image/*" onchange="uploadNewFoto(this, 'kta')">
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div class="pb-2 border-b border-slate-100 text-xs font-bold text-blue-600 uppercase tracking-widest">Identitas Utama</div>
-                    
-                    <div class="space-y-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase">NIK (16 Digit)</label>
-                        <input id="editNik" type="text" inputmode="numeric" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" placeholder="3203...">
-                    </div>
-                    
-                    <div class="space-y-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase">Nama Lengkap</label>
-                        <input id="editNama" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 uppercase outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                    </div>
-
+                    <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">NIK (16 Digit)</label><input id="editNik" type="text" inputmode="numeric" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
+                    <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Nama Lengkap</label><input id="editNama" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 uppercase outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
                     <div class="space-y-1">
                         <label class="block text-xs font-bold text-slate-500 uppercase">Jenis Kelamin</label>
                         <select id="editGender" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                            <option value="">-- Pilih --</option>
-                            <option value="LAKI-LAKI">LAKI-LAKI</option>
-                            <option value="PEREMPUAN">PEREMPUAN</option>
+                            <option value="">-- Pilih --</option><option value="LAKI-LAKI">LAKI-LAKI</option><option value="PEREMPUAN">PEREMPUAN</option>
                         </select>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Agama</label>
-                            <input id="editAgama" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Pekerjaan</label>
-                            <input id="editPekerjaan" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Agama</label><input id="editAgama" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Pekerjaan</label><input id="editPekerjaan" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Tempat Lahir</label>
-                            <input id="editTempatLahir" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Tgl Lahir</label>
-                            <input id="editTglLahir" type="text" placeholder="DD-MM-YYYY" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Tempat Lahir</label><input id="editTempatLahir" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Tgl Lahir</label><input id="editTglLahir" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div class="pb-2 border-b border-slate-100 text-xs font-bold text-blue-600 uppercase tracking-widest">Alamat & Lokasi</div>
-                    
                     <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 space-y-3">
-                        <div class="flex items-center gap-2 text-yellow-800 text-xs font-bold uppercase mb-1">
-                            <i data-lucide="map-pin" class="w-3 h-3"></i> Wilayah Administrasi
+                        <div class="flex items-center gap-2 text-yellow-800 text-xs font-bold uppercase mb-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Wilayah Administrasi</div>
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-yellow-700 uppercase">Kecamatan</label>
+                            <input id="displayKec" type="text" readonly class="w-full px-3 py-2 bg-yellow-100/50 border border-yellow-300 rounded-lg text-sm font-bold text-slate-700 outline-none cursor-not-allowed">
                         </div>
                         <div class="space-y-1">
-                            <select id="editKec" onchange="loadDesaOptions(this.value)" class="w-full px-3 py-2.5 bg-white border border-yellow-300 rounded-lg text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-yellow-500"></select>
-                        </div>
-                        <div class="space-y-1">
-                            <select id="editDesa" class="w-full px-3 py-2.5 bg-white border border-yellow-300 rounded-lg text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-yellow-500"></select>
+                            <label class="block text-[10px] font-bold text-yellow-700 uppercase">Desa / Kelurahan</label>
+                            <input id="displayDesa" type="text" readonly class="w-full px-3 py-2 bg-yellow-100/50 border border-yellow-300 rounded-lg text-sm font-bold text-slate-700 outline-none cursor-not-allowed">
                         </div>
                     </div>
-
-                    <div class="space-y-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase">Alamat Jalan / Kp</label>
-                        <textarea id="editAlamat" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea>
-                    </div>
-
+                    <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">Alamat Jalan / Kp</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea></div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase text-center">RT</label>
-                            <input id="editRt" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase text-center">RW</label>
-                            <input id="editRw" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase text-center">RT</label><input id="editRt" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase text-center">RW</label><input id="editRw" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div class="pb-2 border-b border-slate-100 text-xs font-bold text-blue-600 uppercase tracking-widest">Kontak & Jabatan</div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">No. HP / WA</label>
-                            <input id="editNoHp" type="tel" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                        </div>
+                        <div class="space-y-1"><label class="block text-xs font-bold text-slate-500 uppercase">No. HP / WA</label><input id="editNoHp" type="tel" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></div>
                         <div class="space-y-1">
                             <label class="block text-xs font-bold text-slate-500 uppercase">Jabatan</label>
                             <select id="editJabatan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
@@ -359,9 +333,6 @@
             try {
                 const res = await fetch('/api/locations?type=kecamatan');
                 listKecamatan = await res.json();
-                const selKec = document.getElementById('editKec');
-                selKec.innerHTML = '<option value="">- Pilih Kecamatan -</option>';
-                listKecamatan.forEach(k => selKec.innerHTML += `<option value="${k.kode_kec}">${k.nama_kecamatan}</option>`);
             } catch (e) {}
         }
 
@@ -395,20 +366,11 @@
         }
         function resetFoto(type) {
             if (type === 'ktp') { 
-                fileKtp = null; base64Ktp = ""; 
-                document.getElementById('previewKtpContainer').classList.add('hidden'); 
-                document.getElementById('btnKtpPlaceholder').classList.remove('hidden'); 
-                document.getElementById('inputKtpKamera').value = ""; 
+                fileKtp = null; base64Ktp = ""; document.getElementById('previewKtpContainer').classList.add('hidden'); document.getElementById('btnKtpPlaceholder').classList.remove('hidden'); document.getElementById('inputKtpKamera').value = ""; 
             } else if (type === 'orang') { 
-                fileOrang = null; 
-                document.getElementById('previewOrangContainer').classList.add('hidden'); 
-                document.getElementById('btnOrangPlaceholder').classList.remove('hidden'); 
-                document.getElementById('inputOrangKamera').value = ""; 
+                fileOrang = null; document.getElementById('previewOrangContainer').classList.add('hidden'); document.getElementById('btnOrangPlaceholder').classList.remove('hidden'); document.getElementById('inputOrangKamera').value = ""; 
             } else if (type === 'kta') {
-                fileKta = null;
-                document.getElementById('previewKtaContainer').classList.add('hidden');
-                document.getElementById('btnKtaPlaceholder').classList.remove('hidden');
-                document.getElementById('inputKtaKamera').value = "";
+                fileKta = null; document.getElementById('previewKtaContainer').classList.add('hidden'); document.getElementById('btnKtaPlaceholder').classList.remove('hidden'); document.getElementById('inputKtaKamera').value = "";
             }
         }
 
@@ -454,73 +416,135 @@
             finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`; lucide.createIcons(); }
         }
 
-        // MODAL
+        // MODAL LOGIC
         async function openDetailModal(data, isReadOnlyMode) {
             currentDetailId = data.id || null;
             document.getElementById('displayKtp').src = data.foto_url;
             document.getElementById('editFotoUrl').value = data.foto_url;
             
+            // Set Foto Orang / KTA
             document.getElementById('displayOrang').src = data.foto_orang_url || "https://via.placeholder.com/150?text=No+Photo";
             document.getElementById('editFotoOrangUrl').value = data.foto_orang_url || "";
-            document.getElementById('editFotoKtaUrl').value = data.foto_kta || ""; // Hidden field untuk KTA
+            document.getElementById('displayKta').src = data.foto_kta || "https://via.placeholder.com/150?text=No+Photo";
+            document.getElementById('editFotoKtaUrl').value = data.foto_kta || "";
 
-            const overlay = document.getElementById('overlayEditFoto');
-            if (isReadOnlyMode) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); } else { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
+            // Tampilkan Overlay Edit Foto jika mode "View" (isReadOnlyMode = true)
+            // Namun Sembunyikan jika mode "Confirm" (isReadOnlyMode = false) karena di confirm ada tombol sendiri
+            const overlayOrang = document.getElementById('overlayEditOrang');
+            const overlayKta = document.getElementById('overlayEditKta');
+            
+            if (isReadOnlyMode) { 
+                overlayOrang.classList.remove('hidden'); overlayOrang.classList.add('flex');
+                overlayKta.classList.remove('hidden'); overlayKta.classList.add('flex');
+            } else { 
+                overlayOrang.classList.add('hidden'); overlayOrang.classList.remove('flex');
+                overlayKta.classList.add('hidden'); overlayKta.classList.remove('flex');
+            }
 
+            // Fill Forms
             document.getElementById('editNik').value = data.nik || "";
             document.getElementById('editNama').value = data.nama || "";
             document.getElementById('editTempatLahir').value = data.tempat_lahir || "";
             document.getElementById('editTglLahir').value = data.tanggal_lahir || "";
             document.getElementById('editGender').value = data.jenis_kelamin ? data.jenis_kelamin.toUpperCase() : "";
-            
-            // Populate Agama & Pekerjaan
             document.getElementById('editAgama').value = data.agama || "";
             document.getElementById('editPekerjaan').value = data.pekerjaan || "";
-
             document.getElementById('editAlamat').value = data.alamat || "";
             document.getElementById('editRt').value = data.rt || "";
             document.getElementById('editRw').value = data.rw || "";
             document.getElementById('editNoHp').value = data.no_hp || "";
             document.getElementById('editJabatan').value = data.jabatan || "Anggota";
 
-            // Logic ReadOnly
-            const inputs = document.querySelectorAll('#modalConfirm input, #modalConfirm select, #modalConfirm textarea');
-            inputs.forEach(el => el.disabled = isReadOnlyMode);
-            // Kecuali tombol close dan edit foto (jika ada logic khusus)
+            // Handle Lokasi (Tampilkan Nama saja di Input Readonly)
+            let namaKec = data.kecamatan || "";
+            let namaDesa = data.kelurahan || "";
             
+            // Jika data dari DB (View History) biasanya ada field nama_kecamatan / nama_desa
+            if(data.nama_kecamatan) namaKec = data.nama_kecamatan;
+            if(data.nama_desa) namaDesa = data.nama_desa;
+
+            document.getElementById('displayKec').value = namaKec;
+            document.getElementById('displayDesa').value = namaDesa;
+            
+            // Simpan Code di Hidden Input untuk kebutuhan Save (terutama mode Scan)
+            // Jika mode Scan, data.kode_desa sudah ada. Jika mode Edit, ambil dari existing.
+            document.getElementById('editKodeDesa').value = data.kode_desa_lengkap || data.kode_desa || "";
+            
+            // Logic ReadOnly Inputs
+            const inputs = document.querySelectorAll('#modalConfirm input:not([type="file"]), #modalConfirm select, #modalConfirm textarea');
+            inputs.forEach(el => el.disabled = isReadOnlyMode);
+            
+            // Tombol Simpan
             const btnSimpan = document.getElementById('btnSimpan');
             if (isReadOnlyMode) {
                 btnSimpan.classList.add('hidden');
                 document.getElementById('modalTitle').innerText = "Detail Data";
-                await loadDesaOptions(data.kode_kec || ""); 
-                document.getElementById('editKec').value = data.kode_kec || ""; 
             } else {
                 btnSimpan.classList.remove('hidden');
                 document.getElementById('modalTitle').innerText = "Konfirmasi Data";
-                autoMatchLocation(data);
+                // Jika baru scan, coba auto-match kode desa jika belum ada
+                if(!data.kode_desa_lengkap) await autoMatchLocation(data);
             }
             document.getElementById('modalConfirm').classList.remove('hidden');
         }
 
         async function autoMatchLocation(data) {
              const textKec = (data.kecamatan || "").toLowerCase().replace("kecamatan", "").trim();
-             const match = listKecamatan.find(k => k.nama_kecamatan.toLowerCase().includes(textKec));
-             if(match) {
-                 document.getElementById('editKec').value = match.kode_kec;
-                 await loadDesaOptions(match.kode_kec, data.kelurahan);
+             const matchKec = listKecamatan.find(k => k.nama_kecamatan.toLowerCase().includes(textKec));
+             
+             if(matchKec) {
+                 // Set Nama Kecamatan di Display
+                 document.getElementById('displayKec').value = matchKec.nama_kecamatan;
+                 
+                 // Cari Desa
+                 try {
+                     const res = await fetch(`/api/locations?type=desa&parent=${matchKec.kode_kec}`);
+                     const desas = await res.json();
+                     const textDesa = (data.kelurahan || "").toLowerCase().replace(/(desa|kelurahan)/g,"").trim();
+                     const matchDesa = desas.find(d => d.nama_desa.toLowerCase().includes(textDesa));
+                     
+                     if(matchDesa) {
+                         document.getElementById('displayDesa').value = matchDesa.nama_desa;
+                         document.getElementById('editKodeDesa').value = matchDesa.kode_desa_lengkap;
+                     }
+                 } catch(e) {}
              }
         }
 
-        async function loadDesaOptions(kodeKec, autoSelectName = null) {
-            const selDesa = document.getElementById('editDesa'); selDesa.innerHTML = '<option>Loading...</option>';
+        async function uploadNewFoto(input, type) { 
+            if (!input.files || !input.files[0]) return;
+            const loading = Swal.fire({title: 'Update Foto...', didOpen: () => Swal.showLoading()});
             try {
-                const res = await fetch(`/api/locations?type=desa&parent=${kodeKec}`); const desas = await res.json();
-                selDesa.innerHTML = '<option value="">- Pilih Desa -</option>';
-                desas.forEach(d => {
-                    const sel = (autoSelectName && d.nama_desa.toLowerCase().includes(autoSelectName.toLowerCase().replace(/(desa|kelurahan)/g,"").trim())) ? 'selected' : '';
-                    selDesa.innerHTML += `<option value="${d.kode_desa_lengkap}" ${sel}>${d.nama_desa}</option>`;
-                });
-            } catch(e) {}
+                const fd = new FormData(); fd.append('file', input.files[0]);
+                const res = await fetch('/api/upload-simple', { method: 'POST', body: fd });
+                const json = await res.json();
+                if (json.success) {
+                    await fetch('/api/update-foto-orang', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ id: currentDetailId, foto_url: json.url, type: type }) 
+                    });
+                    
+                    if(type === 'orang') document.getElementById('displayOrang').src = json.url;
+                    else if(type === 'kta') document.getElementById('displayKta').src = json.url;
+
+                    loadMyData(); loading.close(); Swal.fire("Sukses", "Foto diubah", "success");
+                }
+            } catch (e) { loading.close(); Swal.fire("Gagal", e.message, "error"); }
+        }
+        
+        async function hapusFoto(type) {
+            if(!confirm("Hapus foto ini?")) return;
+            await fetch('/api/update-foto-orang', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ id: currentDetailId, foto_url: "", type: type }) 
+            });
+            
+            if(type === 'orang') document.getElementById('displayOrang').src = "https://via.placeholder.com/150?text=No+Photo";
+            else if(type === 'kta') document.getElementById('displayKta').src = "https://via.placeholder.com/150?text=No+Photo";
+            
+            loadMyData();
         }
 
         async function simpanFinal() {
@@ -528,8 +552,8 @@
                 nik: document.getElementById('editNik').value,
                 nama: document.getElementById('editNama').value,
                 jenis_kelamin: document.getElementById('editGender').value,
-                kode_desa_lengkap: document.getElementById('editDesa').value,
-                nama_desa: document.getElementById('editDesa').options[document.getElementById('editDesa').selectedIndex]?.text,
+                kode_desa_lengkap: document.getElementById('editKodeDesa').value, // Ambil dari Hidden
+                nama_desa: document.getElementById('displayDesa').value, // Ambil text display
                 foto_url: document.getElementById('editFotoUrl').value,
                 foto_orang_url: document.getElementById('editFotoOrangUrl').value,
                 foto_kta: document.getElementById('editFotoKtaUrl').value,
@@ -549,26 +573,6 @@
                 const result = await res.json();
                 if(result.success) { closeModal(); Swal.fire("Berhasil", "Data disimpan", "success"); navTo('hasil'); } else throw new Error(result.error);
             } catch(e) { Swal.fire("Gagal", e.message, "error"); }
-        }
-
-        async function uploadNewFotoOrang(input) { 
-            if (!input.files || !input.files[0]) return;
-            const loading = Swal.fire({title: 'Update Foto...', didOpen: () => Swal.showLoading()});
-            try {
-                const fd = new FormData(); fd.append('file', input.files[0]);
-                const res = await fetch('/api/upload-simple', { method: 'POST', body: fd });
-                const json = await res.json();
-                if (json.success) {
-                    await fetch('/api/update-foto-orang', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: currentDetailId, foto_url: json.url }) });
-                    document.getElementById('displayOrang').src = json.url; loadMyData(); loading.close(); Swal.fire("Sukses", "Foto diubah", "success");
-                }
-            } catch (e) { loading.close(); Swal.fire("Gagal", e.message, "error"); }
-        }
-        
-        async function hapusFotoOrang() {
-            if(!confirm("Hapus foto selfie?")) return;
-            await fetch('/api/update-foto-orang', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: currentDetailId, foto_url: "" }) });
-            document.getElementById('displayOrang').src = "https://via.placeholder.com/150?text=No+Photo"; loadMyData();
         }
 
         function closeModal() { document.getElementById('modalConfirm').classList.add('hidden'); }
