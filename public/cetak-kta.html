@@ -10,7 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.3.0/dom-to-image-more.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700;800&display=swap');
+        /* Menggunakan Arimo sebagai pengganti Arial yang presisi */
+        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
 
         body {
             background-color: #e2e8f0;
@@ -18,7 +19,7 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            font-family: 'Arimo', sans-serif;
+            font-family: 'Arimo', sans-serif; /* Font mirip Arial */
         }
 
         .kta-card {
@@ -49,7 +50,6 @@
             border-radius: 2px;
             z-index: 10;
             background-color: #ddd;
-            /* Pastikan foto tidak kena border tailwind */
             border: none !important; 
             outline: none !important;
         }
@@ -61,16 +61,15 @@
             width: 44mm; 
             padding-left: 2.5mm; 
             box-sizing: border-box; 
-            line-height: 1.15;
+            line-height: 1.2;
             z-index: 10;
             
-            /* RESET WAJIB: Hapus semua border/outline default Tailwind */
+            /* RESET CSS */
             border: none !important;
             outline: none !important;
             background: transparent !important;
         }
 
-        /* RESET AGRESIF UNTUK SEMUA ANAK TEXT-AREA */
         .text-area * {
             border: none !important;
             outline: none !important;
@@ -78,28 +77,34 @@
             background: transparent !important;
         }
 
+        /* STYLE FONT MIRIP CONTOH */
         .kta-number {
-            font-size: 10pt;
-            font-weight: 800;
+            font-family: 'Arimo', Arial, sans-serif;
+            font-size: 11pt; /* Ukuran pas, tidak raksasa */
+            font-weight: 700; /* Bold Standar (bukan Extra Bold) */
+            color: #000000;
             margin-bottom: 2px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.5px; /* Jarak antar angka sedikit renggang biar jelas */
         }
 
         .kta-name {
-            font-size: 8pt;
-            font-weight: 800;
+            font-family: 'Arimo', Arial, sans-serif;
+            font-size: 9pt;
+            font-weight: 700; /* Bold Standar */
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #000000;
         }
 
         .kta-details {
-            font-size: 5.5pt;
-            font-weight: 400;
-            color: #222;
-            line-height: 1.2;
+            font-family: 'Arimo', Arial, sans-serif;
+            font-size: 6.5pt; /* Sedikit diperbesar agar terbaca */
+            font-weight: 400; /* Regular / Tipis */
+            color: #1a1a1a;   /* Hitam pekat */
+            line-height: 1.3;
         }
 
         @media print {
@@ -209,7 +214,6 @@
                     transformOrigin: 'top left',
                     width: `${card.clientWidth}px`,
                     height: `${card.clientHeight}px`,
-                    // PASTIKAN TIDAK ADA BORDER SAAT RENDER
                     'border': 'none',
                     'outline': 'none'
                 }
