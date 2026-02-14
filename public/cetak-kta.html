@@ -10,16 +10,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.3.0/dom-to-image-more.min.js"></script>
     
     <style>
-        /* Menggunakan Arimo sebagai pengganti Arial yang presisi */
-        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
-
+        /* Font Calibri sebagai font utama, fallback ke sans-serif */
         body {
             background-color: #e2e8f0;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            font-family: 'Arimo', sans-serif; /* Font mirip Arial */
+            font-family: 'Calibri', sans-serif; 
         }
 
         .kta-card {
@@ -61,7 +59,7 @@
             width: 44mm; 
             padding-left: 2.5mm; 
             box-sizing: border-box; 
-            line-height: 1.2;
+            line-height: 1.15;
             z-index: 10;
             
             /* RESET CSS */
@@ -77,20 +75,21 @@
             background: transparent !important;
         }
 
-        /* STYLE FONT MIRIP CONTOH */
+        /* --- STYLE FONT BARU (CALIBRI & UKURAN SAMA) --- */
+        
         .kta-number {
-            font-family: 'Arimo', Arial, sans-serif;
-            font-size: 11pt; /* Ukuran pas, tidak raksasa */
-            font-weight: 700; /* Bold Standar (bukan Extra Bold) */
+            font-family: 'Calibri', sans-serif;
+            font-size: 9pt;     /* Ukuran disamakan dengan Nama */
+            font-weight: 700;   /* Bold */
             color: #000000;
             margin-bottom: 2px;
-            letter-spacing: 0.5px; /* Jarak antar angka sedikit renggang biar jelas */
+            letter-spacing: 0px; /* Normal spacing */
         }
 
         .kta-name {
-            font-family: 'Arimo', Arial, sans-serif;
-            font-size: 9pt;
-            font-weight: 700; /* Bold Standar */
+            font-family: 'Calibri', sans-serif;
+            font-size: 9pt;     /* Ukuran SAMA dengan No KTA */
+            font-weight: 700;   /* Bold */
             text-transform: uppercase;
             margin-bottom: 3px;
             white-space: nowrap;
@@ -100,11 +99,11 @@
         }
 
         .kta-details {
-            font-family: 'Arimo', Arial, sans-serif;
-            font-size: 6.5pt; /* Sedikit diperbesar agar terbaca */
-            font-weight: 400; /* Regular / Tipis */
-            color: #1a1a1a;   /* Hitam pekat */
-            line-height: 1.3;
+            font-family: 'Calibri', sans-serif;
+            font-size: 6.5pt; /* Detail tetap kecil agar muat */
+            font-weight: 400; /* Regular */
+            color: #000000;   /* Hitam pekat */
+            line-height: 1.25;
         }
 
         @media print {
