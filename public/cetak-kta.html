@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak KTA Perindo</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Font mirip dengan contoh KTP */
-        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+        /* Font Arimo agar mirip dengan font asli KTP */
+        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700;800&display=swap');
 
         body {
             background-color: #e2e8f0;
@@ -20,98 +19,94 @@
             font-family: 'Arimo', sans-serif;
         }
 
-        /* Ukuran Kartu ID-1 (KTP) : 85.60mm x 53.98mm */
+        /* UKURAN KARTU (2 SISI VERTIKAL / ATAS-BAWAH) 
+           Lebar Standar ID-1: 85.6mm
+           Tinggi 1 Sisi: 53.98mm
+           Tinggi Total (Depan + Belakang): 107.96mm
+        */
         .kta-card {
             width: 85.6mm;
-            height: 53.98mm;
-            background-image: url('/kta_blanko.png'); /* Pastikan file ini ada di public folder */
-            background-size: cover;
-            background-position: center;
+            height: 107.96mm; 
+            /* Gambar blanko harus mencakup sisi depan (atas) dan belakang (bawah) */
+            background-image: url('/kta_blanko.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
             position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             overflow: hidden;
-            color: #333;
-            /* Anti-aliasing text */
-            -webkit-font-smoothing: antialiased;
+            color: #000;
+            background-color: white;
+            /* Memastikan warna akurat saat cetak */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
-        /* Posisi Foto */
+        /* --- POSISI DATA (HANYA DI SISI DEPAN / BAGIAN ATAS) --- */
+
+        /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
-            top: 26.5mm;   /* Sesuaikan dengan kotak putih di blanko */
-            left: 4.5mm;
+            top: 27mm;      /* Jarak dari tepi atas */
+            left: 4.5mm;    /* Jarak dari tepi kiri */
             width: 15mm;
             height: 19mm;
-            background-color: #ccc;
             object-fit: cover;
-            border-radius: 1px;
+            border-radius: 2px;
+            z-index: 10;
+            background-color: #ddd; /* Placeholder warna abu */
         }
 
-        /* Area Teks Utama */
+        /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            top: 26mm;
-            left: 21mm; /* Geser kanan dari foto */
-            width: 45mm;
-            line-height: 1.1;
+            top: 26.5mm;
+            left: 21mm; /* Tepat di sebelah kanan foto */
+            width: 44mm; /* Lebar area teks dibatasi agar tidak menabrak area QR bawaan blanko */
+            line-height: 1.15;
+            z-index: 10;
         }
 
         .kta-number {
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: 800;
+            margin-bottom: 2px;
             letter-spacing: 0.5px;
-            margin-bottom: 1px;
-            color: #000;
         }
 
         .kta-name {
-            font-size: 9pt;
-            font-weight: 700;
+            font-size: 8pt;
+            font-weight: 800;
             text-transform: uppercase;
             margin-bottom: 2px;
-            color: #000;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 45mm;
         }
 
         .kta-details {
             font-size: 5.5pt;
-            color: #444;
-            line-height: 1.2;
+            font-weight: 400;
+            color: #222;
+            line-height: 1.25;
         }
 
-        /* QR Code */
-        .qr-area {
-            position: absolute;
-            top: 27mm;
-            right: 4mm;
-            width: 14mm;
-            height: 14mm;
-            background: white;
-            padding: 1px;
-        }
-        .qr-area img {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* CSS Print */
+        /* CSS KHUSUS PRINT */
         @media print {
             body { 
                 background: white; 
                 margin: 0; 
                 padding: 0; 
-                display: block; 
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
             }
             .no-print { display: none !important; }
             .kta-card {
                 box-shadow: none;
-                /* Pastikan background tercetak */
+                margin-top: 10mm; /* Margin atas agar tidak terpotong printer */
+                /* Memaksa background image tercetak */
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                margin: 5mm; /* Jarak aman tepi kertas */
             }
         }
     </style>
@@ -128,20 +123,20 @@
     </div>
 
     <div class="kta-card" id="card">
+        
         <img id="imgFoto" src="https://via.placeholder.com/150" class="photo-area" crossorigin="anonymous">
         
         <div class="text-area">
-            <div id="txtKta" class="kta-number">...</div>
-            <div id="txtNama" class="kta-name">...</div>
+            <div id="txtKta" class="kta-number">LOADING...</div>
+            <div id="txtNama" class="kta-name">LOADING...</div>
             <div class="kta-details">
                 <div id="txtTtl">...</div>
                 <div id="txtAlamat" style="margin-top: 1px;">...</div>
-                <div id="txtHp" style="margin-top: 2px;">Telp : ...</div>
+                <div id="txtHp" style="margin-top: 2px;">...</div>
             </div>
         </div>
 
-        <div id="qrcode" class="qr-area"></div>
-    </div>
+        </div>
 
     <script>
         lucide.createIcons();
@@ -152,55 +147,43 @@
             const nik = params.get('nik');
 
             if (!id && !nik) {
-                alert("Data tidak ditemukan");
+                alert("Data tidak ditemukan (ID/NIK kosong).");
                 return;
             }
 
             try {
-                // Panggil API Generator KTA
+                // Panggil API Backend
                 const res = await fetch(`/api/get-kta?${id ? 'id='+id : 'nik='+nik}`);
                 const data = await res.json();
 
                 if (data.error) throw new Error(data.error);
 
-                // Populate Data
-                document.getElementById('txtKta').innerText = data.no_kta;
-                document.getElementById('txtNama').innerText = data.nama;
+                // Populate Data Teks
+                document.getElementById('txtKta').innerText = data.no_kta || "-";
+                document.getElementById('txtNama').innerText = data.nama || "-";
                 
-                // Format TTL: CIANJUR / 26-12-1975
-                const tgl = data.tanggal_lahir || ""; // Asumsi format DD-MM-YYYY dari input
+                const tgl = data.tanggal_lahir || "";
                 document.getElementById('txtTtl').innerText = `${data.tempat_lahir || 'CIANJUR'} / ${tgl}`;
 
-                // Format Alamat: Kp Cikaret RT 003 RW 002
-                // Desa, Kecamatan, Kab
-                // Potong string agar muat jika terlalu panjang
-                const alamatLengkap = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, Jawa Barat`;
+                // Format Alamat
+                // Potong string agar muat di kotak kecil (Max sekitar 80 karakter)
+                let alamatLengkap = `${data.alamat || ''} RT.${data.rt}/${data.rw}, ${data.nama_desa}, ${data.nama_kecamatan}, Jawa Barat`.toUpperCase();
+                if(alamatLengkap.length > 85) alamatLengkap = alamatLengkap.substring(0, 82) + "...";
+                
                 document.getElementById('txtAlamat').innerText = alamatLengkap;
+                document.getElementById('txtHp').innerText = `Telp : ${data.no_hp_format || '-'}`;
 
-                document.getElementById('txtHp').innerText = `Telp : ${data.no_hp_format}`;
-
-                // Foto (Gunakan Proxy atau CORS jika perlu, tapi Cloudinary biasanya aman)
+                // Populate Foto Profile
                 if (data.foto_orang_url) {
                     document.getElementById('imgFoto').src = data.foto_orang_url;
                 } else if (data.foto_url) {
-                    // Fallback ke foto KTP jika selfie tidak ada (opsional)
-                    // document.getElementById('imgFoto').src = data.foto_url; 
+                    // Fallback ke foto KTP jika selfie tidak ada
+                    document.getElementById('imgFoto').src = data.foto_url; 
                 }
-
-                // Generate QR Code (Isi: Nomor KTA atau Link Verifikasi)
-                // Disini kita isi Nomor KTA dan Nama sebagai identitas
-                const qrContent = `KTA:${data.no_kta}|NAMA:${data.nama}|NIK:${data.nik}`;
-                new QRCode(document.getElementById("qrcode"), {
-                    text: qrContent,
-                    width: 128,
-                    height: 128,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
 
             } catch (e) {
                 alert("Gagal memuat data: " + e.message);
+                console.error(e);
             }
         }
 
