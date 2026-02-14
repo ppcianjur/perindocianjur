@@ -87,6 +87,20 @@
                 <input type="file" id="inputOrangGaleri" accept="image/*" class="hidden" onchange="previewImage(this, 'orang')">
             </div>
 
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="credit-card" class="w-4 h-4 text-red-500"></i> Foto KTA (Opsional)</h3>
+                <div id="previewKtaContainer" class="hidden relative mb-3 group">
+                    <img id="imgPreviewKta" class="w-full h-48 object-cover rounded-xl shadow border-2 border-slate-100">
+                    <button onclick="resetFoto('kta')" class="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+                <div id="btnKtaPlaceholder" class="grid grid-cols-2 gap-3">
+                    <button onclick="document.getElementById('inputKtaKamera').click()" class="py-3 bg-red-50 text-red-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-red-100"><i data-lucide="camera" class="w-5 h-5"></i> Kamera</button>
+                    <button onclick="document.getElementById('inputKtaGaleri').click()" class="py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-xs flex flex-col items-center gap-1 hover:bg-slate-100"><i data-lucide="image" class="w-5 h-5"></i> Galeri</button>
+                </div>
+                <input type="file" id="inputKtaKamera" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this, 'kta')">
+                <input type="file" id="inputKtaGaleri" accept="image/*" class="hidden" onchange="previewImage(this, 'kta')">
+            </div>
+
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -96,7 +110,15 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jabatan</label>
                         <select id="jabatan" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 border">
-                            <option value="">- Pilih -</option><option value="Ketua">Ketua DPRT</option><option value="Sekretaris">Sekretaris DPRT</option><option value="Bendahara">Bendahara DPRT</option><option value="Anggota">Anggota</option><option value="DPRT">DPRT</option>
+                            <option value="">- Pilih -</option>
+                            <option value="Ketua">Ketua DPRT</option>
+                            <option value="Sekretaris">Sekretaris DPRT</option>
+                            <option value="Bendahara">Bendahara DPRT</option>
+                            <option value="Anggota">Anggota</option>
+                            <option value="DPRT">DPRT</option>
+                            <option value="Ketua DPC">Ketua DPC</option>
+                            <option value="Sekretaris DPC">Sekretaris DPC</option>
+                            <option value="Bendahara DPC">Bendahara DPC</option>
                         </select>
                     </div>
                 </div>
@@ -185,7 +207,7 @@
             </div>
             
             <div class="p-6 overflow-y-auto flex-1 bg-white space-y-6">
-                <input type="hidden" id="editFotoUrl"><input type="hidden" id="editFotoOrangUrl">
+                <input type="hidden" id="editFotoUrl"><input type="hidden" id="editFotoOrangUrl"><input type="hidden" id="editFotoKtaUrl">
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -227,6 +249,17 @@
                             <option value="LAKI-LAKI">LAKI-LAKI</option>
                             <option value="PEREMPUAN">PEREMPUAN</option>
                         </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Agama</label>
+                            <input id="editAgama" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Pekerjaan</label>
+                            <input id="editPekerjaan" type="text" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -284,6 +317,7 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase">Jabatan</label>
                             <select id="editJabatan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
                                 <option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Anggota">Anggota</option><option value="Koordinator">Kordes</option>
+                                <option value="Ketua DPC">Ketua DPC</option><option value="Sekretaris DPC">Sekretaris DPC</option><option value="Bendahara DPC">Bendahara DPC</option>
                             </select>
                         </div>
                     </div>
@@ -306,7 +340,7 @@
         document.getElementById('profileName').innerText = user.username;
         document.getElementById('printSubtitle').innerText = `Dicetak oleh: ${user.username} | Tanggal: ${new Date().toLocaleDateString('id-ID')}`;
 
-        let fileKtp = null, fileOrang = null, base64Ktp = "";
+        let fileKtp = null, fileOrang = null, fileKta = null, base64Ktp = "";
         let listKecamatan = [], allData = [];
         let currentPage = 1, currentDetailId = null;
         const rowsPerPage = 10;
@@ -344,19 +378,38 @@
                         document.getElementById('previewKtpContainer').classList.remove('hidden');
                         document.getElementById('btnKtpPlaceholder').classList.add('hidden');
                         fileKtp = file; base64Ktp = e.target.result.split(',')[1];
-                    } else {
+                    } else if (type === 'orang') {
                         document.getElementById('imgPreviewOrang').src = e.target.result;
                         document.getElementById('previewOrangContainer').classList.remove('hidden');
                         document.getElementById('btnOrangPlaceholder').classList.add('hidden');
                         fileOrang = file;
+                    } else if (type === 'kta') {
+                        document.getElementById('imgPreviewKta').src = e.target.result;
+                        document.getElementById('previewKtaContainer').classList.remove('hidden');
+                        document.getElementById('btnKtaPlaceholder').classList.add('hidden');
+                        fileKta = file;
                     }
                 }
                 reader.readAsDataURL(file);
             }
         }
         function resetFoto(type) {
-            if (type === 'ktp') { fileKtp = null; base64Ktp = ""; document.getElementById('previewKtpContainer').classList.add('hidden'); document.getElementById('btnKtpPlaceholder').classList.remove('hidden'); document.getElementById('inputKtpKamera').value = ""; } 
-            else { fileOrang = null; document.getElementById('previewOrangContainer').classList.add('hidden'); document.getElementById('btnOrangPlaceholder').classList.remove('hidden'); document.getElementById('inputOrangKamera').value = ""; }
+            if (type === 'ktp') { 
+                fileKtp = null; base64Ktp = ""; 
+                document.getElementById('previewKtpContainer').classList.add('hidden'); 
+                document.getElementById('btnKtpPlaceholder').classList.remove('hidden'); 
+                document.getElementById('inputKtpKamera').value = ""; 
+            } else if (type === 'orang') { 
+                fileOrang = null; 
+                document.getElementById('previewOrangContainer').classList.add('hidden'); 
+                document.getElementById('btnOrangPlaceholder').classList.remove('hidden'); 
+                document.getElementById('inputOrangKamera').value = ""; 
+            } else if (type === 'kta') {
+                fileKta = null;
+                document.getElementById('previewKtaContainer').classList.add('hidden');
+                document.getElementById('btnKtaPlaceholder').classList.remove('hidden');
+                document.getElementById('inputKtaKamera').value = "";
+            }
         }
 
         async function prosesScan() {
@@ -376,12 +429,27 @@
                     if(jsonOrang.success) fotoOrangUrl = jsonOrang.url;
                 }
 
+                let fotoKtaUrl = "";
+                if (fileKta) {
+                    const fdKta = new FormData(); fdKta.append('file', fileKta);
+                    const resKta = await fetch('/api/upload-simple', { method: 'POST', body: fdKta });
+                    const jsonKta = await resKta.json();
+                    if(jsonKta.success) fotoKtaUrl = jsonKta.url;
+                }
+
                 const fdKtp = new FormData(); fdKtp.append('foto', fileKtp); fdKtp.append('base64', base64Ktp); fdKtp.append('creator', user.username);
                 const resKtp = await fetch('/api/upload-ktp', { method: 'POST', body: fdKtp });
                 const jsonKtp = await resKtp.json();
                 if (!jsonKtp.success) throw new Error(jsonKtp.error);
 
-                openDetailModal({...jsonKtp.data, foto_url: jsonKtp.foto_url, foto_orang_url: fotoOrangUrl, no_hp: hp, jabatan: jab}, false);
+                openDetailModal({
+                    ...jsonKtp.data, 
+                    foto_url: jsonKtp.foto_url, 
+                    foto_orang_url: fotoOrangUrl, 
+                    foto_kta: fotoKtaUrl,
+                    no_hp: hp, 
+                    jabatan: jab
+                }, false);
             } catch (e) { Swal.fire("Error", e.message, "error"); } 
             finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="scan-line"></i> Proses Data`; lucide.createIcons(); }
         }
@@ -391,8 +459,10 @@
             currentDetailId = data.id || null;
             document.getElementById('displayKtp').src = data.foto_url;
             document.getElementById('editFotoUrl').value = data.foto_url;
+            
             document.getElementById('displayOrang').src = data.foto_orang_url || "https://via.placeholder.com/150?text=No+Photo";
             document.getElementById('editFotoOrangUrl').value = data.foto_orang_url || "";
+            document.getElementById('editFotoKtaUrl').value = data.foto_kta || ""; // Hidden field untuk KTA
 
             const overlay = document.getElementById('overlayEditFoto');
             if (isReadOnlyMode) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); } else { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
@@ -402,6 +472,11 @@
             document.getElementById('editTempatLahir').value = data.tempat_lahir || "";
             document.getElementById('editTglLahir').value = data.tanggal_lahir || "";
             document.getElementById('editGender').value = data.jenis_kelamin ? data.jenis_kelamin.toUpperCase() : "";
+            
+            // Populate Agama & Pekerjaan
+            document.getElementById('editAgama').value = data.agama || "";
+            document.getElementById('editPekerjaan').value = data.pekerjaan || "";
+
             document.getElementById('editAlamat').value = data.alamat || "";
             document.getElementById('editRt').value = data.rt || "";
             document.getElementById('editRw').value = data.rw || "";
@@ -457,6 +532,9 @@
                 nama_desa: document.getElementById('editDesa').options[document.getElementById('editDesa').selectedIndex]?.text,
                 foto_url: document.getElementById('editFotoUrl').value,
                 foto_orang_url: document.getElementById('editFotoOrangUrl').value,
+                foto_kta: document.getElementById('editFotoKtaUrl').value,
+                agama: document.getElementById('editAgama').value,
+                pekerjaan: document.getElementById('editPekerjaan').value,
                 no_hp: document.getElementById('editNoHp').value,
                 jabatan: document.getElementById('editJabatan').value,
                 tempat_lahir: document.getElementById('editTempatLahir').value,
