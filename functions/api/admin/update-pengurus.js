@@ -3,11 +3,13 @@ export async function onRequestPost(context) {
         const req = await context.request.json();
         const db = context.env.DB;
 
-        // PERBAIKAN: Menambahkan update jenis_kelamin
+        // PERBAIKAN: Menambahkan update jenis_kelamin, agama, pekerjaan, foto_kta
+        // PERBAIKAN UTAMA: Menambahkan foto_orang_url agar bisa diupdate (bukan hanya dihapus)
         const query = `
             UPDATE pengurus SET 
                 nik = ?, nama = ?, jenis_kelamin = ?, no_hp = ?, jabatan = ?, 
                 alamat = ?, tempat_lahir = ?, tanggal_lahir = ?,
+                agama = ?, pekerjaan = ?, foto_orang_url = ?, foto_kta = ?,
                 kode_desa_lengkap = ? 
             WHERE id = ?
         `;
@@ -16,6 +18,7 @@ export async function onRequestPost(context) {
             .bind(
                 req.nik, req.nama, req.jenis_kelamin, req.no_hp, req.jabatan,
                 req.alamat, req.tempat_lahir, req.tanggal_lahir,
+                req.agama, req.pekerjaan, req.foto_orang_url, req.foto_kta,
                 req.kode_desa_lengkap, req.id
             )
             .run();
