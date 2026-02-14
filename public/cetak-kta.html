@@ -32,15 +32,13 @@
             overflow: hidden;
             color: #000;
             background-color: white;
-            /* Rendering Image yang lebih tajam */
             image-rendering: -webkit-optimize-contrast;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* --- POSISI DATA (Kembali ke Posisi Normal/PDF karena library ini akurat) --- */
+        /* --- POSISI DATA --- */
 
-        /* 1. Foto Anggota */
         .photo-area {
             position: absolute;
             top: 24.5mm;      
@@ -51,12 +49,13 @@
             border-radius: 2px;
             z-index: 10;
             background-color: #ddd;
+            /* Pastikan foto tidak kena border tailwind */
+            border: none !important; 
+            outline: none !important;
         }
 
-        /* 2. Area Teks Data */
         .text-area {
             position: absolute;
-            /* Posisi dikembalikan ke 24mm (Standar PDF) karena library ini tidak menurunkan teks */
             top: 24mm; 
             left: 21mm; 
             width: 44mm; 
@@ -64,6 +63,19 @@
             box-sizing: border-box; 
             line-height: 1.15;
             z-index: 10;
+            
+            /* RESET WAJIB: Hapus semua border/outline default Tailwind */
+            border: none !important;
+            outline: none !important;
+            background: transparent !important;
+        }
+
+        /* RESET AGRESIF UNTUK SEMUA ANAK TEXT-AREA */
+        .text-area * {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
 
         .kta-number {
@@ -124,7 +136,6 @@
     </div>
 
     <div class="kta-card" id="card">
-        
         <img id="imgFoto" src="https://via.placeholder.com/150" class="photo-area" crossorigin="anonymous">
         
         <div class="text-area">
@@ -136,7 +147,6 @@
                 <div id="txtHp" style="margin-top: 2px;">...</div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -181,7 +191,7 @@
             }
         }
 
-        // FUNGSI DOWNLOAD PNG BARU (DOM-TO-IMAGE-MORE)
+        // FUNGSI DOWNLOAD PNG (DOM-TO-IMAGE-MORE)
         function downloadImage() {
             const card = document.getElementById('card');
             const namaFile = document.getElementById('txtNama').innerText || 'KTA_PERINDO';
@@ -198,7 +208,10 @@
                     transform: `scale(${scale})`,
                     transformOrigin: 'top left',
                     width: `${card.clientWidth}px`,
-                    height: `${card.clientHeight}px`
+                    height: `${card.clientHeight}px`,
+                    // PASTIKAN TIDAK ADA BORDER SAAT RENDER
+                    'border': 'none',
+                    'outline': 'none'
                 }
             })
             .then(function (dataUrl) {
