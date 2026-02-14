@@ -10,7 +10,7 @@
         details > summary { list-style: none; }
     </style>
 </head>
-<body class="bg-slate-50 lg:ml-64">
+<body class="bg-slate-50 lg:ml-64 pb-24">
     <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 hidden lg:block">
         <div class="p-6 text-2xl font-bold text-blue-600 flex items-center gap-2"><i data-lucide="shield-check"></i> AdminPanel</div>
         <nav class="mt-4 px-4 space-y-2">
@@ -26,8 +26,8 @@
     <main class="p-8">
         <header class="mb-6 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800">Cek Kelengkapan Struktur</h1>
-                <p class="text-slate-500 text-sm">Monitoring DPC (Kecamatan) dan DPRT (Desa)</p>
+                <h1 class="text-3xl font-bold text-slate-800">Cek Struktur</h1>
+                <p class="text-slate-500 text-sm">Monitoring DPC & DPRT</p>
             </div>
             <button onclick="loadData()" class="bg-slate-200 p-2 rounded-full hover:bg-slate-300 transition-colors"><i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600"></i></button>
         </header>
@@ -36,118 +36,84 @@
             <span class="text-4xl animate-spin inline-block">🌀</span>
             <p class="text-slate-500 mt-2 font-bold">Menganalisa data...</p>
         </div>
-
         <div id="container" class="space-y-4"></div>
     </main>
 
+    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 pb-safe pt-3 px-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40 flex justify-between items-end lg:hidden">
+        <a href="/admin/dashboard.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="/admin/kelengkapan.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-blue-600 transition-colors">
+            <i data-lucide="list-checks" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Cek</span>
+        </a>
+        <a href="/admin/pengurus.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <div class="bg-slate-100 p-2 rounded-full -mt-6 border-4 border-white shadow-sm">
+                <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[10px] font-medium mt-1">Data</span>
+        </a>
+        <a href="/admin/users.html" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-slate-400 hover:text-blue-600 transition-colors">
+            <i data-lucide="user-cog" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Admin</span>
+        </a>
+        <button onclick="logout()" class="flex-1 flex flex-col items-center gap-1 p-2 pb-4 text-red-400 hover:text-red-600 transition-colors">
+            <i data-lucide="log-out" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Keluar</span>
+        </button>
+    </nav>
+
     <script>
         lucide.createIcons();
-
         async function loadData() {
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('container').innerHTML = '';
-            
             try {
                 const res = await fetch('/api/admin/status-kelengkapan');
                 const data = await res.json();
                 renderData(data);
-            } catch (e) {
-                alert("Gagal memuat data: " + e.message);
-            } finally {
-                document.getElementById('loading').classList.add('hidden');
-            }
+            } catch (e) { alert("Gagal memuat data: " + e.message); } finally { document.getElementById('loading').classList.add('hidden'); }
         }
-
         function renderData(data) {
             const container = document.getElementById('container');
-            
             data.forEach(kec => {
-                // Tentukan Warna & Status DPC
-                let colorDpc = "bg-slate-100 text-slate-500 border-slate-200"; // Kosong
+                let colorDpc = "bg-slate-100 text-slate-500 border-slate-200";
                 let iconDpc = "circle-slash";
                 let textStatusDpc = "Belum Ada Data";
 
-                if (kec.status_dpc === 'LENGKAP') {
-                    colorDpc = "bg-green-50 text-green-700 border-green-200";
-                    iconDpc = "check-circle-2";
-                    textStatusDpc = "Lengkap";
-                } else if (kec.status_dpc === 'KURANG') {
-                    colorDpc = "bg-orange-50 text-orange-700 border-orange-200";
-                    iconDpc = "alert-circle";
-                    textStatusDpc = `Kekurangan: ${kec.missing_dpc.join(', ')}`;
-                }
+                if (kec.status_dpc === 'LENGKAP') { colorDpc = "bg-green-50 text-green-700 border-green-200"; iconDpc = "check-circle-2"; textStatusDpc = "Lengkap"; } 
+                else if (kec.status_dpc === 'KURANG') { colorDpc = "bg-orange-50 text-orange-700 border-orange-200"; iconDpc = "alert-circle"; textStatusDpc = `Kekurangan: ${kec.missing_dpc.join(', ')}`; }
 
-                // Hitung statistik desa di kecamatan ini
                 const desaLengkap = kec.desas.filter(d => d.status === 'LENGKAP').length;
-                const totalDesa = kec.desas.length;
-
-                // Template HTML Per Kecamatan
                 const html = `
                 <details class="group bg-white rounded-2xl border shadow-sm overflow-hidden open:shadow-md transition-all">
                     <summary class="p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between cursor-pointer hover:bg-slate-50 select-none details-marker">
                         <div class="flex items-center gap-4">
-                            <div class="p-3 rounded-xl border ${colorDpc}">
-                                <i data-lucide="${iconDpc}" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-lg text-slate-800">${kec.nama_kecamatan}</h3>
-                                <p class="text-xs font-bold uppercase mt-0.5 ${kec.status_dpc === 'LENGKAP' ? 'text-green-600' : (kec.status_dpc === 'KOSONG' ? 'text-slate-400' : 'text-orange-600')}">
-                                    STATUS DPC: ${textStatusDpc}
-                                </p>
-                            </div>
+                            <div class="p-3 rounded-xl border ${colorDpc}"><i data-lucide="${iconDpc}" class="w-6 h-6"></i></div>
+                            <div><h3 class="font-bold text-lg text-slate-800">${kec.nama_kecamatan}</h3><p class="text-xs font-bold uppercase mt-0.5 ${kec.status_dpc === 'LENGKAP' ? 'text-green-600' : (kec.status_dpc === 'KOSONG' ? 'text-slate-400' : 'text-orange-600')}">STATUS DPC: ${textStatusDpc}</p></div>
                         </div>
                         <div class="flex items-center gap-6">
-                            <div class="text-right">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Desa Lengkap</p>
-                                <p class="text-xl font-bold ${desaLengkap === totalDesa ? 'text-green-600' : 'text-slate-700'}">${desaLengkap} <span class="text-sm text-slate-400 font-medium">/ ${totalDesa}</span></p>
-                            </div>
+                            <div class="text-right"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Desa Lengkap</p><p class="text-xl font-bold ${desaLengkap === kec.desas.length ? 'text-green-600' : 'text-slate-700'}">${desaLengkap} <span class="text-sm text-slate-400 font-medium">/ ${kec.desas.length}</span></p></div>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-slate-300 group-open:rotate-180 transition-transform"></i>
                         </div>
                     </summary>
-                    
                     <div class="border-t border-slate-100 bg-slate-50/50 p-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             ${kec.desas.map(desa => {
-                                let borderDesa = "border-slate-200 bg-white";
-                                let textDesa = "text-slate-500";
-                                let statusText = "Belum Ada Data";
-                                
-                                if (desa.status === 'LENGKAP') {
-                                    borderDesa = "border-green-200 bg-green-50/30";
-                                    textDesa = "text-green-700";
-                                    statusText = "Lengkap";
-                                } else if (desa.status === 'KURANG') {
-                                    borderDesa = "border-orange-200 bg-white";
-                                    textDesa = "text-orange-700";
-                                    statusText = `Kurang: ${desa.missing.join(', ')}`;
-                                }
-
-                                return `
-                                <div class="p-3 rounded-xl border ${borderDesa} text-sm">
-                                    <div class="flex justify-between items-start mb-1">
-                                        <span class="font-bold text-slate-700">${desa.nama_desa}</span>
-                                        ${desa.status === 'LENGKAP' 
-                                            ? '<i data-lucide="check" class="w-4 h-4 text-green-600"></i>' 
-                                            : (desa.status === 'KURANG' ? '<i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500"></i>' : '<i data-lucide="x" class="w-4 h-4 text-slate-300"></i>')
-                                        }
-                                    </div>
-                                    <p class="text-xs ${textDesa}">${statusText}</p>
-                                </div>
-                                `;
+                                let borderDesa = "border-slate-200 bg-white"; let textDesa = "text-slate-500"; let statusText = "Belum Ada Data";
+                                if (desa.status === 'LENGKAP') { borderDesa = "border-green-200 bg-green-50/30"; textDesa = "text-green-700"; statusText = "Lengkap"; } 
+                                else if (desa.status === 'KURANG') { borderDesa = "border-orange-200 bg-white"; textDesa = "text-orange-700"; statusText = `Kurang: ${desa.missing.join(', ')}`; }
+                                return `<div class="p-3 rounded-xl border ${borderDesa} text-sm"><div class="flex justify-between items-start mb-1"><span class="font-bold text-slate-700">${desa.nama_desa}</span>${desa.status === 'LENGKAP' ? '<i data-lucide="check" class="w-4 h-4 text-green-600"></i>' : (desa.status === 'KURANG' ? '<i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500"></i>' : '<i data-lucide="x" class="w-4 h-4 text-slate-300"></i>')}</div><p class="text-xs ${textDesa}">${statusText}</p></div>`;
                             }).join('')}
                         </div>
                     </div>
-                </details>
-                `;
-                
+                </details>`;
                 container.innerHTML += html;
             });
             lucide.createIcons();
         }
-
         function logout() { localStorage.clear(); window.location.href = '/index.html'; }
-        
-        // Auto load
         loadData();
     </script>
 </body>
